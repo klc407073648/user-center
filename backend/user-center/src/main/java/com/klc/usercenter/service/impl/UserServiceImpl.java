@@ -64,12 +64,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         Matcher matcher = Pattern.compile(vaildPattern).matcher(userAccount);
         if(matcher.find())
         {
-            return -1;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"用户账号中存在特殊字符");
         }
 
         //密码和校验密码相同
         if(!userPassword.equals(checkPassword)){
-            return -1;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"用户密码和校验密码不同");
         }
 
         //用户不能重复
@@ -77,7 +77,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         queryWrapper.eq("userAccount",userAccount);
         long count =userMapper.selectCount(queryWrapper);
         if(count>0){
-            return -1;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"用户账号已存在");
         }
 
         //星球账号不能重复
@@ -85,7 +85,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         queryWrapper.eq("planetCode",planetCode);
         count =userMapper.selectCount(queryWrapper);
         if(count>0){
-            return -1;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"星球账号已存在");
         }
 
         //2.加密
@@ -102,7 +102,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         user.setPlanetCode(planetCode);
         boolean res= this.save(user);
         if(!res){
-            return -1;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"插入数据失败");
         }
         return user.getId();
     }
@@ -111,11 +111,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     public User userLogin(String userAccount, String userPassword, HttpServletRequest request) {
         //1. 校验
         if(StringUtils.isAllBlank(userAccount,userPassword)){
-            return null;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"用户账号或密码为空");
         }
 
         if(userAccount.length()<4){
-            return null;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"用户账号小于4位");
         }
 
         if(userPassword.length()<8 ){
@@ -127,7 +127,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         Matcher matcher = Pattern.compile(vaildPattern).matcher(userAccount);
         if(matcher.find())
         {
-            return null;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"用户账号存在特殊字符");
         }
 
         //2.加密
@@ -142,8 +142,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
         //用户不存在
         if(user == null){
-            log.info("user login failed,userAccount cannot match userPassword");
-            return null;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"用户不存在");
         }
 
         //3. 用户脱密

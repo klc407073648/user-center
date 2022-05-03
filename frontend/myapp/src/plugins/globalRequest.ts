@@ -13,6 +13,7 @@ import {stringify} from 'querystring';
  */
 const request = extend({
   credentials: 'include', // 默认请求是否带上cookie
+  //prefix: process.env.NODE_ENV === 'production' ? 'http://usercenter.stibel.icu':undefined
   // requestType: 'form',
 });
 
@@ -21,6 +22,8 @@ const request = extend({
  */
 request.interceptors.request.use((url, options): any => {
   console.log('do request url = {}',url)
+  console.log('process.env.NODE_ENV = {}',process.env.NODE_ENV)
+  //alert(process.env.NODE_ENV)
   return {
     url,
     options: {
