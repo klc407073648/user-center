@@ -4,5 +4,5 @@ using namespace drogon;
 
 int main()
 {
-    app().addListener("127.0.0.1", 8082).run();
+    app().addListener("0.0.0.0", 8082).run();
 }

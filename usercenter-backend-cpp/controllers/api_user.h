@@ -6,19 +6,17 @@ using namespace drogon;
 
 namespace api
 {
-namespace user
-{
-class UserService : public drogon::HttpController<UserService>
+class user : public drogon::HttpController<user>
 {
   public:
     METHOD_LIST_BEGIN
     // use METHOD_ADD to add your custom processing function here;
-    METHOD_ADD(UserService::userRegister, "/register", Post);                  //path is /api/v1/User/{arg1}
-    METHOD_ADD(UserService::userLogin, "/login", Post);  //path is /api/v1/User/{arg1}/detailinfo
-    METHOD_ADD(UserService::userLogout, "/logout", Post);                 //path is /api/v1/User/{arg1}
-    METHOD_ADD(UserService::searchUsers, "/search", Get);                 //path is /api/v1/User/{arg1}
-    METHOD_ADD(UserService::getCurrentUser, "/current", Get);                 //path is /api/v1/User/{arg1}
-    METHOD_ADD(UserService::deleteUsers, "/delete", Post);                 //path is /api/v1/User/{arg1}
+    METHOD_ADD(user::userRegister, "/register", Post);                  //path is /api/v1/User/{arg1}
+    METHOD_ADD(user::userLogin, "/login", Post);  //path is /api/v1/User/{arg1}/detailinfo
+    METHOD_ADD(user::userLogout, "/logout", Post);                 //path is /api/v1/User/{arg1}
+    METHOD_ADD(user::searchUsers, "/search", Get);                 //path is /api/v1/User/{arg1}
+    METHOD_ADD(user::getCurrentUser, "/current", Get);                 //path is /api/v1/User/{arg1}
+    METHOD_ADD(user::deleteUsers, "/delete", Post);                 //path is /api/v1/User/{arg1}
 
     METHOD_LIST_END
 
@@ -30,11 +28,10 @@ class UserService : public drogon::HttpController<UserService>
     void deleteUsers(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback);
 	
 	 public:
-    UserService()
+    user()
     {
         LOG_DEBUG << "User constructor!";
     }
   
 };
-}
 }
