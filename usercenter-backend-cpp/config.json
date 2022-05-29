@@ -7,28 +7,18 @@
 	},
 	"listeners": [{
 			"address": "0.0.0.0",
-			"port": 8086,
+			"port": 8082,
 			"https": false
-		},
-		{
-			"address": "0.0.0.0",
-			"port": 443,
-			"https": true,
-			"cert": "",
-			"key": "",
-			"use_old_tls": false,
-			"ssl_conf": [
-			]
 		}
 	],
 		"db_clients": [{
-		"rdbms": "postgresql",
+		"rdbms": "mysql",
 		"host": "127.0.0.1",
-		"port": 5432,
-		"dbname": "student",
+		"port": 3308,
+		"dbname": "testuser",
 		"schema": "public",
-		"user": "postgres",
-		"passwd": "456789",
+		"user": "root",
+		"password": "456789",
 		"is_fast": false,
 		"number_of_connections": 1,
 		"timeout": -1.0
@@ -109,9 +99,6 @@
 			"http_methods": [
 				"get",
 				"post"
-			],
-			"filters": [
-				"FilterClassName"
 			]
 		}],
 		"idle_connection_timeout": 60,

@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include <string>
-#include <common/ErrorCode.h>
+#include "ErrorCode.h"
 
 template <class T>
 class BaseResponse
@@ -16,23 +16,35 @@ public:
     BaseResponse(int code, T data)
     :code_(code),data_(data)
     {
-        this.message_ = "";
-        this.description_ = "";
+        message_ = "";
+        description_ = "";
     }
 
     BaseResponse(int code, T data, const std::string &message)
     :code_(code),data_(data),message_(message)
     {
-        this(code, data, message, "");
-        this.description_ = "";
+        description_ = "";
     }
 
     BaseResponse(ErrorCode errorCode)
+    :code_(errorCode.getCode()),data_(NULL),message_(errorCode.getMessage()),description_(errorCode.getDescription())
     {
-        this.code_ = errorCode.getCode();
-        this.data_ = NULL;
-        this.message_ = errorCode.getMessage();
-        this.description_ = errorCode.getDescription();
+    }
+
+    int getCode(){
+        return code_;
+    }
+
+    T getData(){
+        return data_;
+    }
+
+    std::string getMessage(){
+        return message_;
+    }
+
+    std::string getDescription(){
+        return description_;
     }
 
 private:

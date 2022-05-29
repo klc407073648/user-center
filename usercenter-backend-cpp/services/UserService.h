@@ -3,14 +3,18 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <drogon/HttpController.h>
 #include <models/User.h>
-#include <vector>
+#include <drogon/HttpController.h>
 
 using namespace drogon;
+using namespace drogon_model::testuser;
 
 namespace usercenter
 {
+	
+class UserService;
+using UserServicePtr = std::shared_ptr<UserService>;
+
 class UserService 
 {
   public:
@@ -31,8 +35,6 @@ class UserService
      * @return 脱敏后的用户信息
      */
     virtual User userLogin(const std::string& userAccount, const std::string& userPassword, const HttpRequestPtr &request) = 0;
-
-    virtual User getSafetyUser(User originUser) = 0;
 
     /**
      * 用户注销

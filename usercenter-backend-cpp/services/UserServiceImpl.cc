@@ -1,12 +1,18 @@
 #include "UserServiceImpl.h"
-#include <drogon/HttpController.h>
+#include <trantor/utils/Utilities.h>
+#include <constants/UserConstant.h>
 #include <regex>
 
 using namespace usercenter;
+using namespace drogon::internal;
 
 long UserServiceImpl::userRegister(const std::string &userAccount, const std::string &userPassword, const std::string &checkPassword, const std::string &planetCode)
 {
-	LOG_INFO << "UserServiceImpl::userRegister in";
+    LOG_INFO << "UserServiceImpl::userRegister in";
+    LOG_INFO << "userAccount:" << userAccount;
+    LOG_INFO << "userPassword:" << userPassword;
+    LOG_INFO << "checkPassword:" << checkPassword;
+    LOG_INFO << "planetCode:" << planetCode;
     /*
     校验用户的账户、密码、校验密码，是否符合要求
     1. 非空
@@ -16,97 +22,170 @@ long UserServiceImpl::userRegister(const std::string &userAccount, const std::st
     5. 账户不包含特殊字符
     6. 密码和校验密码相同
     */
-    try
+    // try
+    //{
+    if (userAccount.size() == 0 || userPassword.size() == 0 || checkPassword.size() == 0)
     {
-        if (userAccount.size() == 0 || userPassword.size() == 0 || checkPassword.size() == 0)
-        {
-            throw BusinessException(ErrorCode::PARAMS_ERROR(), "参数为空");
-        }
-
-        if (userAccount.length() < 4)
-        {
-            throw BusinessException(ErrorCode::PARAMS_ERROR(), "用户账号小于4位");
-        }
-
-        if (userPassword.length() < 8 || checkPassword.length() < 8)
-        {
-            throw BusinessException(ErrorCode::PARAMS_ERROR(), "用户密码和校验密码小于8位");
-        }
-
-        if (planetCode.length() > 5)
-        {
-            throw BusinessException(ErrorCode::PARAMS_ERROR(), "星球编号大于5位");
-        }
-
-        //特殊字符校验
-        std::regex vaildPattern("[~!/@#$%^&*()\\-_=+\\|[{}];:\'\",<.>/?]+");
-        if (regex_match(userAccount, vaildPattern))
-        {
-            throw BusinessException(ErrorCode::PARAMS_ERROR(), "用户账号中存在特殊字符");
-        }
-
-        //密码和校验密码相同
-        if (userPassword!=checkPassword)
-        {
-            throw BusinessException(ErrorCode::PARAMS_ERROR(), "用户密码和校验密码不同");
-        }
-
-        /*
-        //用户不能重复
-        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("userAccount", userAccount);
-        long count = userMapper.selectCount(queryWrapper);
-        if (count > 0)
-        {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户账号已存在");
-        }
-
-        //星球账号不能重复
-        queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("planetCode", planetCode);
-        count = userMapper.selectCount(queryWrapper);
-        if (count > 0)
-        {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "星球账号已存在");
-        }
-
-        // 2.加密
-        String encryptPassword = DigestUtils.md5DigestAsHex((salt + userPassword).getBytes(StandardCharsets.UTF_8));
-        System.out.println(encryptPassword);
-
-
-        // 3.插入数据
-        User user = new User();
-        user.setIphone("");
-        user.setEmail("");
-        user.setUserStatus(0);
-        user.setUserAccount(userAccount);
-        user.setUserPassword(encryptPassword);
-        user.setPlanetCode(planetCode);
-        boolean res = this.save(user);
-        if (!res)
-        {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "插入数据失败");
-        }
-
-
-        return user.getId();
-        */
+        throw BusinessException(ErrorCode::PARAMS_ERROR(), "参数为空");
     }
-    catch (std::exception& ex)
+
+    if (userAccount.length() < 4)
     {
-		LOG_INFO << "BusinessException error";
-		LOG_INFO << ex.what();
-		return -1;
+        throw BusinessException(ErrorCode::PARAMS_ERROR(), "用户账号小于4位");
     }
-    return 1;
+
+    if (userPassword.length() < 8 || checkPassword.length() < 8)
+    {
+        throw BusinessException(ErrorCode::PARAMS_ERROR(), "用户密码和校验密码小于8位");
+    }
+
+    if (planetCode.length() > 5)
+    {
+        throw BusinessException(ErrorCode::PARAMS_ERROR(), "星球编号大于5位");
+    }
+
+    //特殊字符校验
+    if (checkSpecialCharacter(userAccount))
+    {
+        throw BusinessException(ErrorCode::PARAMS_ERROR(), "用户账号中存在特殊字符");
+    }
+
+    //密码和校验密码相同
+    if (userPassword != checkPassword)
+    {
+        throw BusinessException(ErrorCode::PARAMS_ERROR(), "用户密码和校验密码不同");
+    }
+
+    //用户不能重复
+    auto ret = userMapper.findBy(Criteria(User::Cols::_userAccount, CompareOperator::EQ, userAccount));
+
+    LOG_INFO << "ret.size():" << ret.size();
+
+    if (!ret.empty())
+    {
+        throw BusinessException(ErrorCode::PARAMS_ERROR(), "用户账号已存在");
+    }
+
+    //星球账号不能重复
+    ret = userMapper.findBy(Criteria(User::Cols::_planetCode, CompareOperator::EQ, planetCode));
+    if (!ret.empty())
+    {
+        throw BusinessException(ErrorCode::PARAMS_ERROR(), "星球账号已存在");
+    }
+
+    // 2.加密
+    std::string encryptPassword = encryptPwd(userPassword);
+    LOG_INFO << "encryptPassword:" << encryptPassword;
+
+    // 3.插入数据
+    User user;
+    user.setIphone("");
+    user.setEmail("");
+    user.setUserstatus(0);
+    user.setUseraccount(userAccount);
+    user.setUserpassword(encryptPassword);
+    user.setPlanetcode(planetCode);
+    // bool res = userMapper.save(user);
+    userMapper.insert(user);
+
+    ret = userMapper.findBy(Criteria(User::Cols::_planetCode, CompareOperator::EQ, planetCode));
+    if (ret.size() != 1)
+    {
+        throw BusinessException(ErrorCode::PARAMS_ERROR(), "插入数据失败");
+    }
+
+    return *(user.getId());
 }
 User UserServiceImpl::userLogin(const std::string &userAccount, const std::string &userPassword, const HttpRequestPtr &request)
 {
+    LOG_INFO << "UserServiceImpl::userRegister in";
+    LOG_INFO << "userAccount:" << userAccount;
+    LOG_INFO << "userPassword:" << userPassword;
+
+    // 1. 校验
+    if (userAccount.size() == 0 || userPassword.size() == 0)
+    {
+        throw BusinessException(ErrorCode::PARAMS_ERROR(), "用户账号或密码为空");
+    }
+
+    if (userAccount.length() < 4)
+    {
+        throw BusinessException(ErrorCode::PARAMS_ERROR(), "用户账号小于4位");
+    }
+
+    if (userPassword.length() < 8)
+    {
+        throw BusinessException(ErrorCode::PARAMS_ERROR(), "用户密码小于8位");
+    }
+
+    //特殊字符校验
+    if (checkSpecialCharacter(userAccount))
+    {
+        throw BusinessException(ErrorCode::PARAMS_ERROR(), "用户账号中存在特殊字符");
+    }
+
+    // 2.加密
+    std::string encryptPassword = encryptPwd(userPassword);
+    LOG_INFO << "encryptPassword:" << encryptPassword;
+
+    //查询用户是否存在
+    try
+    {
+        auto user = userMapper.findOne(Criteria(User::Cols::_userAccount, CompareOperator::EQ, userAccount) &&
+                                       Criteria(User::Cols::_userPassword, CompareOperator::EQ, encryptPassword));
+
+        // 3. 用户脱密
+        User safetyUser = getSafetyUser(user);
+
+        // 4.记录用户登录态
+        request->attributes()->insert(USER_LOGIN_STATE, safetyUser);
+
+        return safetyUser;
+    }
+    catch (const DrogonDbException &e)
+    {
+        throw BusinessException(ErrorCode::PARAMS_ERROR(), "用户不存在");
+    }
+
+    //return NULL;
 }
 
 User UserServiceImpl::getSafetyUser(User originUser)
 {
+    User safetyUser;
+    safetyUser.setId(originUser.getValueOfId());
+    safetyUser.setUsername(originUser.getValueOfUsername());
+    safetyUser.setUseraccount(originUser.getValueOfUseraccount());
+    safetyUser.setAvatarurl(originUser.getValueOfAvatarurl());
+    safetyUser.setGender(originUser.getValueOfGender());
+    safetyUser.setIphone(originUser.getValueOfIphone());
+    safetyUser.setEmail(originUser.getValueOfEmail());
+    safetyUser.setUserrole(originUser.getValueOfUserrole());
+    safetyUser.setUserstatus(originUser.getValueOfUserstatus());
+    safetyUser.setCreatetime(originUser.getValueOfCreatetime());
+    safetyUser.setPlanetcode(originUser.getValueOfPlanetcode());
+    // safetyUser.setTags(originUser.getValueOfTags());
+
+    return safetyUser;
+}
+
+bool UserServiceImpl::checkSpecialCharacter(const std::string &str)
+{
+    //特殊字符校验
+    std::regex vaildPattern("[~!/@#$%^&*()\\-_=+\\|\\[{}\\];:\'\",<.>/?]+");
+    std::smatch match;
+
+    if (regex_search(str, match, vaildPattern))
+    {
+        return true;
+    }
+
+    return false;
+}
+
+std::string UserServiceImpl::encryptPwd(const std::string &str)
+{
+    return utils::getMd5(str);
 }
 
 int UserServiceImpl::userLogout(const HttpRequestPtr &request)

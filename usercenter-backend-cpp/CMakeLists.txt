@@ -61,8 +61,7 @@ drogon_create_views(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/views
 
 target_include_directories(${PROJECT_NAME}
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
-                                   ${CMAKE_CURRENT_SOURCE_DIR}/models
-								   /home/klc/drogon/drogon/lib/inc)
+								   /home/drogon/drogon/lib/inc)
 target_sources(${PROJECT_NAME}
                PRIVATE
                ${SRC_DIR}

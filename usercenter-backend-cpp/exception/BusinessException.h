@@ -33,6 +33,11 @@ public:
     {
         return description_;
     }
+	
+	std::string getMessage()
+    {
+        return message_;
+    }
 
     const char *what() const noexcept override
     {
