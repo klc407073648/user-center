@@ -54,7 +54,7 @@ namespace usercenter
      * @param request
      * @return
      */
-    int userLogout(const HttpRequestPtr &request) override;
+    long userLogout(const HttpRequestPtr &request) override;
 
     /**
      * 根据标签搜索用户
@@ -62,6 +62,12 @@ namespace usercenter
      * @return
      */
     std::vector<User> searchUsersByTags(std::vector<std::string> tagNameList) override;
+
+    std::vector<User> userSearch(const std::string &username) override;
+
+    User userCurrent(long id) override;
+
+    bool userDelete(long id) override;
 
   private:
     User getSafetyUser(User originUser);

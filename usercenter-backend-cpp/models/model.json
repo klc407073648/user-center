@@ -5,6 +5,6 @@
 	"dbname": "testuser",
 	"schema": "public",
 	"user": "root",
-	"password": "456789",
+	"password": "123456",
 	"tables": []
 }

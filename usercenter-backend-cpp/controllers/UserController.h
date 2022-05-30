@@ -35,9 +35,9 @@ class UserController : public drogon::HttpController<UserController>
     void userRegister(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback, User &&reqUser);
     void userLogin(const HttpRequestPtr &req,std::function<void(const HttpResponsePtr &)> &&callback, User &&reqUser);
     void userLogout(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback);
-    void searchUsers(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback);
+    void searchUsers(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback, User &&reqUser);
     void getCurrentUser(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback);
-    void deleteUsers(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback);
+    void deleteUsers(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback, User &&reqUser);
 	
 	 public:
     UserController()
@@ -45,6 +45,7 @@ class UserController : public drogon::HttpController<UserController>
     {
         LOG_DEBUG << "UserController constructor!";
     }
+    bool isAdmin(const HttpRequestPtr &req);
   
   private:
       UserServicePtr userSrvPtr_;

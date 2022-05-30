@@ -41,7 +41,7 @@ class UserService
      * @param request
      * @return
      */
-    virtual int userLogout(const HttpRequestPtr &request) = 0;
+    virtual long userLogout(const HttpRequestPtr &request) = 0;
 
     /**
      * 根据标签搜索用户
@@ -49,6 +49,12 @@ class UserService
      * @return
      */
     virtual std::vector<User> searchUsersByTags(std::vector<std::string> tagNameList) = 0;
+
+    virtual std::vector<User> userSearch(const std::string &username) = 0;
+
+    virtual User userCurrent(long id) = 0;
+
+    virtual bool userDelete(long id) = 0;
   
 };
 }

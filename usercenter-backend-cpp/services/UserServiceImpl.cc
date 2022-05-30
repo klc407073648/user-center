@@ -98,7 +98,7 @@ long UserServiceImpl::userRegister(const std::string &userAccount, const std::st
 }
 User UserServiceImpl::userLogin(const std::string &userAccount, const std::string &userPassword, const HttpRequestPtr &request)
 {
-    LOG_INFO << "UserServiceImpl::userRegister in";
+    LOG_INFO << "UserServiceImpl::userLogin in";
     LOG_INFO << "userAccount:" << userAccount;
     LOG_INFO << "userPassword:" << userPassword;
 
@@ -146,12 +146,73 @@ User UserServiceImpl::userLogin(const std::string &userAccount, const std::strin
     {
         throw BusinessException(ErrorCode::PARAMS_ERROR(), "用户不存在");
     }
-
-    //return NULL;
 }
+
+std::vector<User> UserServiceImpl::userSearch(const std::string &username)
+{
+    LOG_INFO << "UserServiceImpl::userSearch in";
+
+    auto userList = userMapper.findBy(Criteria(User::Cols::_username, CompareOperator::EQ, username));
+
+    std::vector<User> safetyUserList;
+
+    for (auto user : userList)
+    {
+        safetyUserList.push_back(getSafetyUser(user));
+    }
+    return safetyUserList;
+}
+
+User UserServiceImpl::userCurrent(long id)
+{
+    LOG_INFO << "UserServiceImpl::userCurrent in";
+
+    try
+    {
+        auto user = userMapper.findOne(Criteria(User::Cols::_id, CompareOperator::EQ, id));
+
+        // 3. 用户脱密
+        User safetyUser = getSafetyUser(user);
+
+        return safetyUser;
+    }
+    catch (const DrogonDbException &e)
+    {
+        throw BusinessException(ErrorCode::PARAMS_ERROR(), "获取当前用户失败");
+    }
+}
+
+bool UserServiceImpl::userDelete(long id)
+{
+    LOG_INFO << "UserServiceImpl::userDelete in";
+
+    try
+    {
+        long ret = userMapper.deleteBy(Criteria(User::Cols::_id, CompareOperator::EQ, id));
+
+        if(ret!=1){
+            throw BusinessException(ErrorCode::PARAMS_ERROR(), "删除指定用户失败");
+        }
+        return true;
+    }
+    catch (const DrogonDbException &e)
+    {
+        throw BusinessException(ErrorCode::PARAMS_ERROR(), "删除指定用户失败");
+    }
+}
+
+long UserServiceImpl::userLogout(const HttpRequestPtr &request)
+{
+    LOG_INFO << "UserServiceImpl::userLogout in";
+	AttributesPtr attributes = request->getAttributes();
+    attributes->erase(USER_LOGIN_STATE);
+    return 1;
+}
+
 
 User UserServiceImpl::getSafetyUser(User originUser)
 {
+
     User safetyUser;
     safetyUser.setId(originUser.getValueOfId());
     safetyUser.setUsername(originUser.getValueOfUsername());
@@ -188,9 +249,6 @@ std::string UserServiceImpl::encryptPwd(const std::string &str)
     return utils::getMd5(str);
 }
 
-int UserServiceImpl::userLogout(const HttpRequestPtr &request)
-{
-}
 std::vector<User> UserServiceImpl::searchUsersByTags(std::vector<std::string> tagNameList)
 {
 }
