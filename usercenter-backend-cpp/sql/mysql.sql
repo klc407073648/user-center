@@ -2,8 +2,7 @@
 create table user
 (
     username     varchar(256)                       null comment '用户昵称',
-    id           bigint auto_increment comment 'id'
-        primary key,
+    id           bigint auto_increment comment 'id' primary key,
     userAccount  varchar(256)                       null comment '账号',
     avatarUrl    varchar(1024)                      null comment '用户头像',
     gender       tinyint                            null comment '性别',
@@ -21,16 +20,15 @@ create table user
 
 
 INSERT INTO `testuser`.`user` (`username`, `id`, `userAccount`, `avatarUrl`, `gender`, `userPassword`, `iphone`, `email`, `userStatus`, `createTime`, `updateTime`, `idDelete`, `userRole`, `planetCode`) VALUES (NULL, 1, '11111', '11111', NULL, '11111', NULL, '11111', 0, '2022-05-29 05:00:06', '2022-05-29 05:00:06', 0, 0, NULL);
-INSERT INTO `testuser`.`user` (`username`, `id`, `userAccount`, `avatarUrl`, `gender`, `userPassword`, `iphone`, `email`, `userStatus`, `createTime`, `updateTime`, `idDelete`, `userRole`, `planetCode`) VALUES (NULL, 1, '11111', '11111', NULL, '11111', NULL, '11111', 0, '2022-05-29 05:00:06', '2022-05-29 05:00:06', 0, 0, NULL);
-INSERT INTO `testuser`.`user` (`username`, `id`, `userAccount`, `avatarUrl`, `gender`, `userPassword`, `iphone`, `email`, `userStatus`, `createTime`, `updateTime`, `idDelete`, `userRole`, `planetCode`) VALUES (NULL, 1, '11111', '11111', NULL, '11111', NULL, '11111', 0, '2022-05-29 05:00:06', '2022-05-29 05:00:06', 0, 0, NULL);
+INSERT INTO `testuser`.`user` (`username`, `id`, `userAccount`, `avatarUrl`, `gender`, `userPassword`, `iphone`, `email`, `userStatus`, `createTime`, `updateTime`, `idDelete`, `userRole`, `planetCode`) VALUES (NULL, 2, '22222', '22222', NULL, '22222', NULL, '22222', 0, '2022-05-29 05:00:06', '2022-05-29 05:00:06', 0, 0, NULL);
+INSERT INTO `testuser`.`user` (`username`, `id`, `userAccount`, `avatarUrl`, `gender`, `userPassword`, `iphone`, `email`, `userStatus`, `createTime`, `updateTime`, `idDelete`, `userRole`, `planetCode`) VALUES (NULL, 3, '33333', '33333', NULL, '33333', NULL, '33333', 0, '2022-05-29 05:00:06', '2022-05-29 05:00:06', 0, 0, NULL);
 
 alter table user add column tags varchar(1024) null comment '标签列表';
 
 -- auto-generated definition
 create table tag
 (
-    id         bigint auto_increment comment 'id'
-        primary key,
+    id         bigint auto_increment comment 'id' primary key,
     tagName    varchar(256)                       null comment '标签名称',
     userId     bigint                             null comment '用户ID',
     parentId   bigint                             null comment '父标签ID',

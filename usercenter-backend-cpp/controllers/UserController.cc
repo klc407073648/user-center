@@ -1,7 +1,7 @@
 #include "UserController.h"
 #include <common/ResultUtils.h>
 #include <models/User.h>
-#include<constants/UserConstant.h>
+#include <constants/UserConstant.h>
 
 using namespace usercenter;
 
@@ -16,19 +16,19 @@ namespace drogon
     inline User fromRequest(const HttpRequest &req)
     {
         auto json = req.getJsonObject();
+        auto jsonStr = (*json).toStyledString();
+        LOG_INFO << "UserController::fromRequest " << jsonStr;
         auto userJson = (*json);
         auto user = User(userJson);
         return user;
     }
 }
 
-void UserController::userRegister(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback, User &&reqUser)
+void UserController::userRegister(const HttpRequestPtr &request, std::function<void(const HttpResponsePtr &)> &&callback, User &&reqUser)
 {
     LOG_INFO << "UserController::userRegister in";
 
-    std::string checkPassword = ((*(req->getJsonObject()))["checkPassword"]).asString();
-
-    LOG_INFO << "checkPassword:" << checkPassword;
+    std::string checkPassword = ((*(request->getJsonObject()))["checkPassword"]).asString();
 
     try
     {
@@ -64,7 +64,7 @@ void UserController::userRegister(const HttpRequestPtr &req, std::function<void(
     }
 }
 
-void UserController::userLogin(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback, User &&reqUser)
+void UserController::userLogin(const HttpRequestPtr &request, std::function<void(const HttpResponsePtr &)> &&callback, User &&reqUser)
 {
     LOG_INFO << "UserController::userLogin in";
 
@@ -83,7 +83,7 @@ void UserController::userLogin(const HttpRequestPtr &req, std::function<void(con
             throw BusinessException(ErrorCode::PARAMS_ERROR(), "入参中账号或密码为空");
         }
 
-        auto user = userSrvPtr_->userLogin(userAccount, userPassword, req);
+        auto user = userSrvPtr_->userLogin(userAccount, userPassword, request);
 
         auto base = ResultUtils<User>::susscess(user);
         auto json = ResultUtils<User>::rep2jsonUser(base);
@@ -100,18 +100,18 @@ void UserController::userLogin(const HttpRequestPtr &req, std::function<void(con
     }
 }
 
-void UserController::userLogout(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback)
+void UserController::userLogout(const HttpRequestPtr &request, std::function<void(const HttpResponsePtr &)> &&callback)
 {
     LOG_INFO << "UserController::userLogout in";
 
     try
     {
-        if (req == nullptr)
+        if (request == nullptr)
         {
             throw BusinessException(ErrorCode::PARAMS_ERROR(), "请求为空");
         }
 
-        long result = userSrvPtr_->userLogout(req);
+        long result = userSrvPtr_->userLogout(request);
 
         auto base = ResultUtils<long>::susscess(result);
         auto json = ResultUtils<long>::rep2json(base);
@@ -128,13 +128,13 @@ void UserController::userLogout(const HttpRequestPtr &req, std::function<void(co
     }
 }
 
-void UserController::searchUsers(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback, User &&reqUser)
+void UserController::searchUsers(const HttpRequestPtr &request, std::function<void(const HttpResponsePtr &)> &&callback, User &&reqUser)
 {
     LOG_INFO << "UserController::searchUsers in";
 
     try
     {
-        if (!isAdmin(req))
+        if (!isAdmin(request))
         {
             throw BusinessException(ErrorCode::PARAMS_ERROR(), "非管理员用户，无查询权限");
         }
@@ -156,21 +156,20 @@ void UserController::searchUsers(const HttpRequestPtr &req, std::function<void(c
     }
 }
 
-void UserController::getCurrentUser(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback)
+void UserController::getCurrentUser(const HttpRequestPtr &request, std::function<void(const HttpResponsePtr &)> &&callback)
 {
     LOG_INFO << "UserController::getCurrentUser in";
 
     try
     {
-        bool isFind = req->attributes()->find(USER_LOGIN_STATE);
+        bool isFind = request->getSession()->find(USER_LOGIN_STATE);
 
         if (!isFind)
         {
             throw BusinessException(ErrorCode::NO_LOGIN());
         }
 
-        AttributesPtr attributes = req->getAttributes();
-        User curentUser = attributes->get<User>(USER_LOGIN_STATE);
+        User curentUser = request->getSession()->get<User>(USER_LOGIN_STATE);
 
         long userId = curentUser.getValueOfId();
 
@@ -191,13 +190,13 @@ void UserController::getCurrentUser(const HttpRequestPtr &req, std::function<voi
     }
 }
 
-void UserController::deleteUsers(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback, User &&reqUser)
+void UserController::deleteUsers(const HttpRequestPtr &request, std::function<void(const HttpResponsePtr &)> &&callback, User &&reqUser)
 {
     LOG_INFO << "UserController::deleteUsers in";
 
     try
     {
-        if (!isAdmin(req))
+        if (!isAdmin(request))
         {
             throw BusinessException(ErrorCode::PARAMS_ERROR(), "非管理员用户，无删除权限");
         }
@@ -226,16 +225,15 @@ void UserController::deleteUsers(const HttpRequestPtr &req, std::function<void(c
     }
 }
 
-bool UserController::isAdmin(const HttpRequestPtr &req)
+bool UserController::isAdmin(const HttpRequestPtr &request)
 {
     LOG_INFO << "UserController::isAdmin in";
 
-    bool isFind = req->attributes()->find(USER_LOGIN_STATE);
+    bool isFind = request->getSession()->find(USER_LOGIN_STATE);
 
     if (isFind)
     {
-		AttributesPtr attributes = req->getAttributes();
-        User user = attributes->get<User>(USER_LOGIN_STATE);
+        User user = request->getSession()->get<User>(USER_LOGIN_STATE);
         if (user.getValueOfUserrole() == ADMIN_ROLE)
         {
             return true;

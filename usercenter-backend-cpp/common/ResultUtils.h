@@ -72,7 +72,8 @@ public:
     {
         Json::Value ret;
         ret["code"] = rep.getCode();
-        ret["data"] = rep.getData();
+		Json::Int64 tmstp = rep.getData();
+        ret["data"] = tmstp;
         ret["message"] = rep.getMessage();
         ret["description"] = rep.getDescription();
         return ret;

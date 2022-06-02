@@ -32,12 +32,12 @@ class UserController : public drogon::HttpController<UserController>
 
     METHOD_LIST_END
 
-    void userRegister(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback, User &&reqUser);
-    void userLogin(const HttpRequestPtr &req,std::function<void(const HttpResponsePtr &)> &&callback, User &&reqUser);
-    void userLogout(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback);
-    void searchUsers(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback, User &&reqUser);
-    void getCurrentUser(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback);
-    void deleteUsers(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback, User &&reqUser);
+    void userRegister(const HttpRequestPtr &request, std::function<void(const HttpResponsePtr &)> &&callback, User &&reqUser);
+    void userLogin(const HttpRequestPtr &request,std::function<void(const HttpResponsePtr &)> &&callback, User &&reqUser);
+    void userLogout(const HttpRequestPtr &request, std::function<void(const HttpResponsePtr &)> &&callback);
+    void searchUsers(const HttpRequestPtr &request, std::function<void(const HttpResponsePtr &)> &&callback, User &&reqUser);
+    void getCurrentUser(const HttpRequestPtr &request, std::function<void(const HttpResponsePtr &)> &&callback);
+    void deleteUsers(const HttpRequestPtr &request, std::function<void(const HttpResponsePtr &)> &&callback, User &&reqUser);
 	
 	 public:
     UserController()
@@ -45,7 +45,7 @@ class UserController : public drogon::HttpController<UserController>
     {
         LOG_DEBUG << "UserController constructor!";
     }
-    bool isAdmin(const HttpRequestPtr &req);
+    bool isAdmin(const HttpRequestPtr &request);
   
   private:
       UserServicePtr userSrvPtr_;

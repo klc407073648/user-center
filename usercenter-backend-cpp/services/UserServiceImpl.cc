@@ -13,6 +13,7 @@ long UserServiceImpl::userRegister(const std::string &userAccount, const std::st
     LOG_INFO << "userPassword:" << userPassword;
     LOG_INFO << "checkPassword:" << checkPassword;
     LOG_INFO << "planetCode:" << planetCode;
+
     /*
     校验用户的账户、密码、校验密码，是否符合要求
     1. 非空
@@ -22,9 +23,8 @@ long UserServiceImpl::userRegister(const std::string &userAccount, const std::st
     5. 账户不包含特殊字符
     6. 密码和校验密码相同
     */
-    // try
-    //{
-    if (userAccount.size() == 0 || userPassword.size() == 0 || checkPassword.size() == 0)
+    
+    if (userAccount.size() == 0 || userPassword.size() == 0 || checkPassword.size() == 0 || checkPassword.size() == 0)
     {
         throw BusinessException(ErrorCode::PARAMS_ERROR(), "参数为空");
     }
@@ -127,7 +127,6 @@ User UserServiceImpl::userLogin(const std::string &userAccount, const std::strin
     // 2.加密
     std::string encryptPassword = encryptPwd(userPassword);
     LOG_INFO << "encryptPassword:" << encryptPassword;
-
     //查询用户是否存在
     try
     {
@@ -136,10 +135,8 @@ User UserServiceImpl::userLogin(const std::string &userAccount, const std::strin
 
         // 3. 用户脱密
         User safetyUser = getSafetyUser(user);
-
         // 4.记录用户登录态
-        request->attributes()->insert(USER_LOGIN_STATE, safetyUser);
-
+        request->getSession()->insert(USER_LOGIN_STATE, safetyUser);
         return safetyUser;
     }
     catch (const DrogonDbException &e)
@@ -167,6 +164,8 @@ User UserServiceImpl::userCurrent(long id)
 {
     LOG_INFO << "UserServiceImpl::userCurrent in";
 
+    LOG_INFO << "UserServiceImpl::id"<<id;
+
     try
     {
         auto user = userMapper.findOne(Criteria(User::Cols::_id, CompareOperator::EQ, id));
@@ -190,7 +189,8 @@ bool UserServiceImpl::userDelete(long id)
     {
         long ret = userMapper.deleteBy(Criteria(User::Cols::_id, CompareOperator::EQ, id));
 
-        if(ret!=1){
+        if (ret != 1)
+        {
             throw BusinessException(ErrorCode::PARAMS_ERROR(), "删除指定用户失败");
         }
         return true;
@@ -204,15 +204,13 @@ bool UserServiceImpl::userDelete(long id)
 long UserServiceImpl::userLogout(const HttpRequestPtr &request)
 {
     LOG_INFO << "UserServiceImpl::userLogout in";
-	AttributesPtr attributes = request->getAttributes();
-    attributes->erase(USER_LOGIN_STATE);
+    request->getSession()->erase(USER_LOGIN_STATE);
     return 1;
 }
 
-
 User UserServiceImpl::getSafetyUser(User originUser)
 {
-
+    LOG_INFO << "UserServiceImpl::getSafetyUser in";
     User safetyUser;
     safetyUser.setId(originUser.getValueOfId());
     safetyUser.setUsername(originUser.getValueOfUsername());

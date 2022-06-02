@@ -10,15 +10,11 @@
 #include <models/User.h>
 
 using namespace drogon;
-using namespace drogon_model::testuser;
 using namespace drogon::orm;
+using namespace drogon_model::testuser;
 
 namespace usercenter
 {
-
-  class UserServiceImpl;
-  using UserServiceImplPtr = std::shared_ptr<UserServiceImpl>;
-
   class UserServiceImpl : public UserService
   {
   public:
@@ -30,38 +26,11 @@ namespace usercenter
     {
     }
 
-    /**
-     * 用户注册
-     *
-     * @param userAccount   用户账号
-     * @param userPassword  用户密码
-     * @param checkPassword 校验密码
-     * @return 新用户 id
-     */
     long userRegister(const std::string &userAccount, const std::string &userPassword, const std::string &checkPassword, const std::string &planetCode) override;
 
-    /**
-     *
-     * @param userAccount 用户账号
-     * @param userPassword 用户密码
-     * @return 脱敏后的用户信息
-     */
     User userLogin(const std::string &userAccount, const std::string &userPassword, const HttpRequestPtr &request) override;
 
-
-    /**
-     * 用户注销
-     * @param request
-     * @return
-     */
     long userLogout(const HttpRequestPtr &request) override;
-
-    /**
-     * 根据标签搜索用户
-     * @param tagNameList 用户拥有的标签
-     * @return
-     */
-    std::vector<User> searchUsersByTags(std::vector<std::string> tagNameList) override;
 
     std::vector<User> userSearch(const std::string &username) override;
 
@@ -69,12 +38,14 @@ namespace usercenter
 
     bool userDelete(long id) override;
 
-  private:
-    User getSafetyUser(User originUser);
-    bool checkSpecialCharacter(const std::string &str);
-    std::string encryptPwd(const std::string &str);
+    std::vector<User> searchUsersByTags(std::vector<std::string> tagNameList) override;
 
   private:
-     Mapper<User> userMapper = Mapper<User>(app().getDbClient());
+    User getSafetyUser(User originUser);                //获取脱密后的用户
+    bool checkSpecialCharacter(const std::string &str); //校验特殊字符
+    std::string encryptPwd(const std::string &str);     //密码加密
+
+  private:
+    Mapper<User> userMapper = Mapper<User>(app().getDbClient());
   };
 }
