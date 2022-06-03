@@ -9,41 +9,42 @@ class BaseResponse
 {
 public:
     BaseResponse(int code, T data, const std::string &message, const std::string &description)
-    :code_(code),data_(data),message_(message),description_(description)
+        : code_(code), data_(data), message_(message), description_(description)
     {
     }
 
     BaseResponse(int code, T data)
-    :code_(code),data_(data)
+        : code_(code), data_(data), message_(""), description_("")
     {
-        message_ = "";
-        description_ = "";
     }
 
     BaseResponse(int code, T data, const std::string &message)
-    :code_(code),data_(data),message_(message)
+        : code_(code), data_(data), message_(message), description_("")
     {
-        description_ = "";
     }
 
     BaseResponse(ErrorCode errorCode)
-    :code_(errorCode.getCode()),data_(NULL),message_(errorCode.getMessage()),description_(errorCode.getDescription())
+        : code_(errorCode.getCode()), data_(NULL), message_(errorCode.getMessage()), description_(errorCode.getDescription())
     {
     }
 
-    int getCode(){
+    int getCode()
+    {
         return code_;
     }
 
-    T getData(){
+    T getData()
+    {
         return data_;
     }
 
-    std::string getMessage(){
+    const std::string &getMessage()
+    {
         return message_;
     }
 
-    std::string getDescription(){
+    const std::string &getDescription()
+    {
         return description_;
     }
 

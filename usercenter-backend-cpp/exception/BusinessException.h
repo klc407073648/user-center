@@ -29,12 +29,12 @@ public:
         return code_;
     }
 
-    std::string getDescription()
+    const std::string & getDescription()
     {
         return description_;
     }
 	
-	std::string getMessage()
+	const std::string & getMessage()
     {
         return message_;
     }

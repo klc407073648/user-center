@@ -1,7 +1,7 @@
 #include "UserController.h"
-#include <common/ResultUtils.h>
 #include <models/User.h>
 #include <constants/UserConstant.h>
+#include <common/Response2json.h>
 
 using namespace usercenter;
 
@@ -17,7 +17,7 @@ namespace drogon
     {
         auto json = req.getJsonObject();
         auto jsonStr = (*json).toStyledString();
-        LOG_INFO << "UserController::fromRequest " << jsonStr;
+        LOG_INFO << "UserController::fromRequest:" << jsonStr;
         auto userJson = (*json);
         auto user = User(userJson);
         return user;
@@ -50,7 +50,7 @@ void UserController::userRegister(const HttpRequestPtr &request, std::function<v
         long id = userSrvPtr_->userRegister(userAccount, userPassword, checkPassword, planetCode);
 
         auto base = ResultUtils<long>::susscess(id);
-        auto json = ResultUtils<long>::rep2json(base);
+        auto json = Response2json<long>::rep2json(base);
         auto resp = HttpResponse::newHttpJsonResponse(json);
         callback(resp);
     }
@@ -58,7 +58,7 @@ void UserController::userRegister(const HttpRequestPtr &request, std::function<v
     {
         LOG_INFO << "BusinessException error: message:" << e.what() << ",description" << e.getDescription();
         auto base = ResultUtils<long>::error(e.getCode(), e.getMessage(), e.getDescription());
-        auto json = ResultUtils<long>::rep2json(base);
+        auto json = Response2json<long>::rep2json(base);
         auto resp = HttpResponse::newHttpJsonResponse(json);
         callback(resp);
     }
@@ -86,7 +86,7 @@ void UserController::userLogin(const HttpRequestPtr &request, std::function<void
         auto user = userSrvPtr_->userLogin(userAccount, userPassword, request);
 
         auto base = ResultUtils<User>::susscess(user);
-        auto json = ResultUtils<User>::rep2jsonUser(base);
+        auto json = Response2json<User>::rep2json(base);
         auto resp = HttpResponse::newHttpJsonResponse(json);
         callback(resp);
     }
@@ -94,7 +94,7 @@ void UserController::userLogin(const HttpRequestPtr &request, std::function<void
     {
         LOG_INFO << "BusinessException error: message:" << e.what() << ",description" << e.getDescription();
         auto base = ResultUtils<long>::error(e.getCode(), e.getMessage(), e.getDescription());
-        auto json = ResultUtils<long>::rep2json(base);
+        auto json = Response2json<long>::rep2json(base);
         auto resp = HttpResponse::newHttpJsonResponse(json);
         callback(resp);
     }
@@ -114,7 +114,7 @@ void UserController::userLogout(const HttpRequestPtr &request, std::function<voi
         long result = userSrvPtr_->userLogout(request);
 
         auto base = ResultUtils<long>::susscess(result);
-        auto json = ResultUtils<long>::rep2json(base);
+        auto json = Response2json<long>::rep2json(base);
         auto resp = HttpResponse::newHttpJsonResponse(json);
         callback(resp);
     }
@@ -122,7 +122,7 @@ void UserController::userLogout(const HttpRequestPtr &request, std::function<voi
     {
         LOG_INFO << "BusinessException error: message:" << e.what() << ",description" << e.getDescription();
         auto base = ResultUtils<long>::error(e.getCode(), e.getMessage(), e.getDescription());
-        auto json = ResultUtils<long>::rep2json(base);
+        auto json = Response2json<long>::rep2json(base);
         auto resp = HttpResponse::newHttpJsonResponse(json);
         callback(resp);
     }
@@ -138,14 +138,14 @@ void UserController::searchUsers(const HttpRequestPtr &request, std::function<vo
         {
             throw BusinessException(ErrorCode::PARAMS_ERROR(), "非管理员用户，无查询权限");
         }
-		
-		std::string username = request->getParameter("username");
-		LOG_INFO << "UserController::username"<<username;
+
+        std::string username = request->getParameter("username");
+        LOG_INFO << "UserController::username" << username;
 
         std::vector<User> userList = userSrvPtr_->userSearch(username);
 
         auto base = ResultUtils<std::vector<User>>::susscess(userList);
-        auto json = ResultUtils<std::vector<User>>::rep2jsonUserList(base);
+        auto json = Response2json<std::vector<User>>::rep2json(base);
         auto resp = HttpResponse::newHttpJsonResponse(json);
         callback(resp);
     }
@@ -153,7 +153,7 @@ void UserController::searchUsers(const HttpRequestPtr &request, std::function<vo
     {
         LOG_INFO << "BusinessException error: message:" << e.what() << ",description" << e.getDescription();
         auto base = ResultUtils<long>::error(e.getCode(), e.getMessage(), e.getDescription());
-        auto json = ResultUtils<long>::rep2json(base);
+        auto json = Response2json<long>::rep2json(base);
         auto resp = HttpResponse::newHttpJsonResponse(json);
         callback(resp);
     }
@@ -179,7 +179,7 @@ void UserController::getCurrentUser(const HttpRequestPtr &request, std::function
         User user = userSrvPtr_->userCurrent(userId);
 
         auto base = ResultUtils<User>::susscess(user);
-        auto json = ResultUtils<User>::rep2jsonUser(base);
+        auto json = Response2json<User>::rep2json(base);
         auto resp = HttpResponse::newHttpJsonResponse(json);
         callback(resp);
     }
@@ -187,7 +187,7 @@ void UserController::getCurrentUser(const HttpRequestPtr &request, std::function
     {
         LOG_INFO << "BusinessException error: message:" << e.what() << ",description" << e.getDescription();
         auto base = ResultUtils<long>::error(e.getCode(), e.getMessage(), e.getDescription());
-        auto json = ResultUtils<long>::rep2json(base);
+        auto json = Response2json<long>::rep2json(base);
         auto resp = HttpResponse::newHttpJsonResponse(json);
         callback(resp);
     }
@@ -214,7 +214,7 @@ void UserController::deleteUsers(const HttpRequestPtr &request, std::function<vo
         bool ret = userSrvPtr_->userDelete(id);
 
         auto base = ResultUtils<bool>::susscess(ret);
-        auto json = ResultUtils<bool>::rep2json(base);
+        auto json = Response2json<bool>::rep2json(base);
         auto resp = HttpResponse::newHttpJsonResponse(json);
         callback(resp);
     }
@@ -222,7 +222,7 @@ void UserController::deleteUsers(const HttpRequestPtr &request, std::function<vo
     {
         LOG_INFO << "BusinessException error: message:" << e.what() << ",description" << e.getDescription();
         auto base = ResultUtils<long>::error(e.getCode(), e.getMessage(), e.getDescription());
-        auto json = ResultUtils<long>::rep2json(base);
+        auto json = Response2json<long>::rep2json(base);
         auto resp = HttpResponse::newHttpJsonResponse(json);
         callback(resp);
     }
@@ -244,4 +244,8 @@ bool UserController::isAdmin(const HttpRequestPtr &request)
     }
 
     return false;
+}
+
+void UserController::retErrorJsonResponse(BusinessException &e)
+{
 }

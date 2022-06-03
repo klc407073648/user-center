@@ -7,7 +7,6 @@
 #include <common/ErrorCode.h>
 #include <exception/BusinessException.h>
 #include "UserService.h"
-#include <models/User.h>
 
 using namespace drogon;
 using namespace drogon::orm;
@@ -46,6 +45,6 @@ namespace usercenter
     std::string encryptPwd(const std::string &str);     //密码加密
 
   private:
-    Mapper<User> userMapper = Mapper<User>(app().getDbClient());
+    Mapper<User> userMapper = Mapper<User>(app().getDbClient()); //对象持久化映射层,连接User对象和数据库
   };
 }

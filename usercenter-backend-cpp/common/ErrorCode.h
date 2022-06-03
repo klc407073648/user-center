@@ -26,6 +26,7 @@ public:
         return description_;
     }
 
+public:
     static ErrorCode SUCCESS()
     {
         return ErrorCode(0, "ok", "");
