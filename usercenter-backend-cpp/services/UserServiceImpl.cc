@@ -127,6 +127,7 @@ User UserServiceImpl::userLogin(const std::string &userAccount, const std::strin
     // 2.加密
     std::string encryptPassword = encryptPwd(userPassword);
     LOG_INFO << "encryptPassword:" << encryptPassword;
+
     //查询用户是否存在
     try
     {
@@ -135,8 +136,10 @@ User UserServiceImpl::userLogin(const std::string &userAccount, const std::strin
 
         // 3. 用户脱密
         User safetyUser = getSafetyUser(user);
+
         // 4.记录用户登录态
         request->getSession()->insert(USER_LOGIN_STATE, safetyUser);
+
         return safetyUser;
     }
     catch (const DrogonDbException &e)
@@ -148,9 +151,16 @@ User UserServiceImpl::userLogin(const std::string &userAccount, const std::strin
 std::vector<User> UserServiceImpl::userSearch(const std::string &username)
 {
     LOG_INFO << "UserServiceImpl::userSearch in";
-
-    auto userList = userMapper.findBy(Criteria(User::Cols::_username, CompareOperator::EQ, username));
-
+	
+	std::vector<User> userList;
+	
+	if(username==""){
+		userList = userMapper.findAll();
+	}
+    else
+	{
+		userList = userMapper.findBy(Criteria(User::Cols::_username, CompareOperator::EQ, username));
+	}
     std::vector<User> safetyUserList;
 
     for (auto user : userList)
@@ -163,8 +173,6 @@ std::vector<User> UserServiceImpl::userSearch(const std::string &username)
 User UserServiceImpl::userCurrent(long id)
 {
     LOG_INFO << "UserServiceImpl::userCurrent in";
-
-    LOG_INFO << "UserServiceImpl::id"<<id;
 
     try
     {
@@ -210,7 +218,7 @@ long UserServiceImpl::userLogout(const HttpRequestPtr &request)
 
 User UserServiceImpl::getSafetyUser(User originUser)
 {
-    LOG_INFO << "UserServiceImpl::getSafetyUser in";
+
     User safetyUser;
     safetyUser.setId(originUser.getValueOfId());
     safetyUser.setUsername(originUser.getValueOfUsername());

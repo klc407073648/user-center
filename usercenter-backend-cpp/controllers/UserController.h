@@ -35,7 +35,7 @@ class UserController : public drogon::HttpController<UserController>
     void userRegister(const HttpRequestPtr &request, std::function<void(const HttpResponsePtr &)> &&callback, User &&reqUser);
     void userLogin(const HttpRequestPtr &request,std::function<void(const HttpResponsePtr &)> &&callback, User &&reqUser);
     void userLogout(const HttpRequestPtr &request, std::function<void(const HttpResponsePtr &)> &&callback);
-    void searchUsers(const HttpRequestPtr &request, std::function<void(const HttpResponsePtr &)> &&callback, User &&reqUser);
+    void searchUsers(const HttpRequestPtr &request, std::function<void(const HttpResponsePtr &)> &&callback);
     void getCurrentUser(const HttpRequestPtr &request, std::function<void(const HttpResponsePtr &)> &&callback);
     void deleteUsers(const HttpRequestPtr &request, std::function<void(const HttpResponsePtr &)> &&callback, User &&reqUser);
 	

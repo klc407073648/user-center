@@ -128,7 +128,7 @@ void UserController::userLogout(const HttpRequestPtr &request, std::function<voi
     }
 }
 
-void UserController::searchUsers(const HttpRequestPtr &request, std::function<void(const HttpResponsePtr &)> &&callback, User &&reqUser)
+void UserController::searchUsers(const HttpRequestPtr &request, std::function<void(const HttpResponsePtr &)> &&callback)
 {
     LOG_INFO << "UserController::searchUsers in";
 
@@ -138,8 +138,11 @@ void UserController::searchUsers(const HttpRequestPtr &request, std::function<vo
         {
             throw BusinessException(ErrorCode::PARAMS_ERROR(), "非管理员用户，无查询权限");
         }
+		
+		std::string username = request->getParameter("username");
+		LOG_INFO << "UserController::username"<<username;
 
-        std::vector<User> userList = userSrvPtr_->userSearch(reqUser.getValueOfUsername());
+        std::vector<User> userList = userSrvPtr_->userSearch(username);
 
         auto base = ResultUtils<std::vector<User>>::susscess(userList);
         auto json = ResultUtils<std::vector<User>>::rep2jsonUserList(base);
