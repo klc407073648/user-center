@@ -1,14 +1,20 @@
 spring:
+  profiles:
+    active: dev
   application:
     name: user-center
   # DataSource Config
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://81.68.132.31:3308/testuser
+    url: jdbc:mysql://1.1.1.1:3308/testuser
     username: root
     password: 456789
     session:
       timeout:86400
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
 server:
   port: 8080
   servlet:
@@ -16,6 +22,7 @@ server:
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: false
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   global-config:
     db-config:
       logic-delete-field: isDelete # 全局逻辑删除的实体字段名(since 3.3.0,配置后可以忽略不配置步骤2)

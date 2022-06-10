@@ -1,9 +1,13 @@
 package com.klc.usercenter.service;
+import java.lang.reflect.Array;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import com.klc.usercenter.model.domain.User;
+import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -46,7 +50,7 @@ class UserServiceTest {
     }
 
     @Test
-    void userRegister() {
+    public void userRegister() {
         String userAccount = "test";
         String userPassword = "";
         String checkPassword = "123456";
@@ -75,5 +79,12 @@ class UserServiceTest {
         result =userService.userRegister(userAccount,userPassword,checkPassword,planetCode);
         Assertions.assertTrue(result < 0);
 
+    }
+
+    @Test
+    public void testSearchUsersByTags() {
+        List<String> tagNameList = Arrays.asList("JAVA","c++");
+        List<User> userList = userService.searchUsersByTags(tagNameList);
+        Assert.assertNotNull(userList);
     }
 }
