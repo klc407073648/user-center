@@ -1,6 +1,8 @@
 package com.klc.usercenter.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.klc.usercenter.common.BaseResponse;
 import com.klc.usercenter.common.ErrorCode;
 import com.klc.usercenter.common.ResultUtils;
@@ -121,8 +123,27 @@ public class UserController {
         return ResultUtils.susscess(result);
     }
 
+    //支持分页
+    @GetMapping("/recommend")
+    public BaseResponse<Page<User>> recommendUsers(long pageSize,long pageNum,HttpServletRequest request){
+        QueryWrapper<User> queryWrapper =new QueryWrapper<>();
 
-        @GetMapping("/current")
+        Page<User> userList = userService.page(new Page<>(pageNum,pageSize),queryWrapper);
+
+        return ResultUtils.susscess(userList);
+    }
+
+    //原始推荐方法
+    /*@GetMapping("/recommend")
+    public BaseResponse<List<User>> recommendUsers(HttpServletRequest request){
+        QueryWrapper<User> queryWrapper =new QueryWrapper<>();
+        List<User> userList = userService.list(queryWrapper);
+        List<User> retUserList =userList.stream().map(user -> userService.getSafetyUser(user)).collect(Collectors.toList());
+
+        return ResultUtils.susscess(retUserList);
+    }*/
+
+    @GetMapping("/current")
     public BaseResponse<User> getCurrentUser(HttpServletRequest request){
         Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
         User curentUser =(User) userObj;
