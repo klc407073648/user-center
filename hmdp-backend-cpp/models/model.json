@@ -1,0 +1,10 @@
+{
+	"rdbms": "mysql",
+	"host": "127.0.0.1",
+	"port": 3308,
+	"dbname": "hmdp",
+	"schema": "public",
+	"user": "root",
+	"password": "111111",
+	"tables": ["tb_user"]
+}
