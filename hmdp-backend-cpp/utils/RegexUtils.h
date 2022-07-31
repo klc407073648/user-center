@@ -1,31 +1,28 @@
 /**
- * @file Util.h
- * @brief 常用工具类
+ * @file RegexUtils.h
+ * @brief 正则工具类
  * @author klc
- * @date 2020-04-30
- * @copyright Copyright (c) 2020年 klc
+ * @date 2022-07-30
+ * @copyright Copyright (c) 2022年 klc
  */
 
-#ifndef __STIBEL_UTIL_H_
-#define __STIBEL_UTIL_H_
+#ifndef _REGEXUTILS_H_
+#define _REGEXUTILS_H_
 
 #include <string>
-#include <iostream>
+#include <regex>
+#include <constants/RegexPatterns.h>
 
 /**
-* @brief 正则工具类
-*/
-class RegexUtils {
+ * @brief 正则工具类
+ */
+class RegexUtils
+{
 public:
-    static std::string loadFile(const std::string &filename);
-    static std::vector<std::string> getFileListFromDir(const std::string& dirPath);
-    static bool isFile(const std::string& path);
-    static bool isDir(const std::string& path);
-    static bool createDir(const std::string& path);
-    static bool copyFile(const std::string& srcFile,const std::string& dstFile);
-    static bool copyDir(const std::string& srcDir,const std::string& dstDir, const bool& isCover);
+    static bool isPhoneInvalid(const std::string &phone);
+    static bool isEmailInvalid(const std::string &email);
+    static bool isPasswordInvalid(const std::string &password);
+    static bool isVerifyCodeInvalid(const std::string &verifyCode);
 };
 
-}//namespace StiBel
-
-#endif //__STIBEL_UTIL_H_
+#endif //_REGEXUTILS_H_

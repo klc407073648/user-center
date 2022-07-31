@@ -1,15 +1,33 @@
-#include "Util.h"
+#include "RegexUtils.h"
 
-bool UserServiceImpl::checkSpecialCharacter(const std::string &str)
+bool RegexUtils::isPhoneInvalid(const std::string &phone)
 {
-    //特殊字符校验
-    std::regex vaildPattern("[~!/@#$%^&*()\\-_=+\\|\\[{}\\];:\'\",<.>/?]+");
+    std::regex vaildPattern(RegexPatterns::PHONE_REGEX);
     std::smatch match;
 
-    if (regex_search(str, match, vaildPattern))
-    {
-        return true;
-    }
+    return regex_match(phone, match, vaildPattern);
+}
 
-    return false;
+bool RegexUtils::isEmailInvalid(const std::string &email)
+{
+    std::regex vaildPattern(RegexPatterns::EMAIL_REGEX);
+    std::smatch match;
+
+    return regex_match(email, match, vaildPattern);
+}
+
+bool RegexUtils::isPasswordInvalid(const std::string &password)
+{
+    std::regex vaildPattern(RegexPatterns::PASSWORD_REGEX);
+    std::smatch match;
+
+    return regex_match(password, match, vaildPattern);
+}
+
+bool RegexUtils::isVerifyCodeInvalid(const std::string &verifyCode)
+{
+    std::regex vaildPattern(RegexPatterns::VERIFY_CODE_REGEX);
+    std::smatch match;
+
+    return regex_match(verifyCode, match, vaildPattern);
 }

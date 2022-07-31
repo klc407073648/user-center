@@ -52,6 +52,8 @@ aux_source_directory(exception EXCEPTION_SRC)
 #aux_source_directory(plugins PLUGIN_SRC)
 aux_source_directory(models MODEL_SRC)
 aux_source_directory(services SERVICE_SRC)
+aux_source_directory(utils UTIL_SRC)
+aux_source_directory(dto DTO_SRC)
 
 drogon_create_views(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/views
                     ${CMAKE_CURRENT_BINARY_DIR})
@@ -70,7 +72,9 @@ target_sources(${PROJECT_NAME}
                ${CONSTANT_SRC}
                ${EXCEPTION_SRC}
                ${MODEL_SRC}
-               ${SERVICE_SRC})
+               ${SERVICE_SRC}
+               ${UTIL_SRC}
+               ${DTO_SRC})
 			   
                #${FILTER_SRC}
                #${PLUGIN_SRC}

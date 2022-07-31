@@ -26,20 +26,19 @@ namespace usercenter
     {
     }
 
-    long sendCode(const std::string &phone, const HttpRequestPtr &request) override;
+    std::string sendCode(const std::string &phone) override;
 
-    TbUser login(const HttpRequestPtr &request) override;
+    std::string login(const std::string &phone, const std::string &code) override;
 
     long logout(const HttpRequestPtr &request) override;
 
     TbUser getCurrent(const HttpRequestPtr &request) override;
 
-
   private:
-    bool isPhoneInvalid(const std::string &str); 
+    TbUser createUserWithPhone(const std::string &phone);
 
   private:
     Mapper<TbUser> userMapper = Mapper<TbUser>(app().getDbClient()); //对象持久化映射层,连接User对象和数据库
-    nosql::RedisClientPtr redisClient = app().getRedisClient(); 
+    nosql::RedisClientPtr redisClient = app().getRedisClient();      // Redis连接对象
   };
 }

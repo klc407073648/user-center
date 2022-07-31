@@ -26,7 +26,7 @@ namespace usercenter
      * @param request       原始请求
      * @return 新用户 id
      */
-    virtual long sendCode(const std::string &phone, const HttpRequestPtr &request) = 0;
+    virtual std::string sendCode(const std::string &phone) = 0;
 
     /**
      * @brief 用户登陆
@@ -34,7 +34,7 @@ namespace usercenter
      * @param request      原始请求
      * @return 脱敏后的用户信息
      */
-    virtual TbUser login(const HttpRequestPtr &request) = 0;
+    virtual std::string login(const std::string &phone,const std::string &code) = 0;
 
     /**
      * @brief 用户注销

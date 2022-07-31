@@ -5,6 +5,7 @@
 #include <services/UserServiceImpl.h>
 #include <models/TbUser.h>
 #include <common/ResultUtils.h>
+#include <common/Response2json.h>
 #include <string>
 #include <json/json.h>
 
