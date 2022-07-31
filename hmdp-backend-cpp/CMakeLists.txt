@@ -19,6 +19,19 @@ endif ()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+## 第三方库
+SET(3PART_INCLUDE           ${PROJECT_SOURCE_DIR}/include/3partlib)
+SET(HIREDIS_INCLUDE         ${3PART_INCLUDE}/hiredis/include)
+SET(REDIS_PLUS_PLUS_INCLUDE         ${3PART_INCLUDE}/redis++/include)
+
+SET(3PART_DIR  ${PROJECT_SOURCE_DIR}/lib/3partlib)
+
+set(CMAKE_INCLUDE_PATH ${HIREDIS_INCLUDE} ${REDIS_PLUS_PLUS_INCLUDE})
+set(CMAKE_LIBRARY_PATH ${3PART_DIR})
+
+LINK_DIRECTORIES(${3PART_DIR})
+## 第三方库
+
 add_executable(${PROJECT_NAME} main.cc)
 
 # ##############################################################################
@@ -29,7 +42,7 @@ add_executable(${PROJECT_NAME} main.cc)
 #
 # and comment out the following lines
 find_package(Drogon CONFIG REQUIRED)
-target_link_libraries(${PROJECT_NAME} PRIVATE Drogon::Drogon)
+target_link_libraries(${PROJECT_NAME} PRIVATE Drogon::Drogon redis++ hiredis pthread)
 
 # ##############################################################################
 
@@ -37,7 +50,7 @@ if (CMAKE_CXX_STANDARD LESS 17)
     # With C++14, use boost to support any, string_view and filesystem
     message(STATUS "use c++14")
     find_package(Boost 1.61.0 REQUIRED)
-    target_link_libraries(${PROJECT_NAME} PUBLIC Boost::boost)
+    target_link_libraries(${PROJECT_NAME} PUBLIC Boost::boost redis++ hiredis pthread)
 elseif (CMAKE_CXX_STANDARD LESS 20)
     message(STATUS "use c++17")
 else ()
@@ -63,7 +76,9 @@ drogon_create_views(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/views
 
 target_include_directories(${PROJECT_NAME}
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
-								   /home/drogon/drogon/lib/inc)
+								   /home/drogon/drogon/lib/inc
+                                   ${HIREDIS_INCLUDE} 
+                                   ${REDIS_PLUS_PLUS_INCLUDE})
 target_sources(${PROJECT_NAME}
                PRIVATE
                ${SRC_DIR}
