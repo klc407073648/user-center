@@ -14,12 +14,12 @@
 	"db_clients": [
 		{
 			"rdbms": "mysql",
-			"host": "81.68.132.31",
+			"host": "1.1.1.1",
 			"port": 3308,
 			"dbname": "hmdp",
 			"schema": "public",
 			"user": "root",
-			"password": "456789",
+			"password": "123456",
 			"is_fast": false,
 			"number_of_connections": 1,
 			"timeout": -1.0
