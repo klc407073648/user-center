@@ -8,10 +8,12 @@
 #include <exception/BusinessException.h>
 #include <drogon/nosql/RedisClient.h>
 #include "UserService.h"
+#include <sw/redis++/redis++.h>
 
 using namespace drogon;
 using namespace drogon::orm;
 using namespace drogon_model::hmdp;
+using namespace sw::redis;
 
 namespace usercenter
 {
@@ -36,9 +38,10 @@ namespace usercenter
 
   private:
     TbUser createUserWithPhone(const std::string &phone);
+    TbUser getSafetyUser(TbUser originUser);
 
   private:
     Mapper<TbUser> userMapper = Mapper<TbUser>(app().getDbClient()); //对象持久化映射层,连接User对象和数据库
-    nosql::RedisClientPtr redisClient = app().getRedisClient();      // Redis连接对象
+    Redis redisClient = Redis("tcp://456789@81.68.132.31:6380");      // Redis连接对象
   };
 }

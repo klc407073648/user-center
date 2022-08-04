@@ -11,7 +11,7 @@
 
 #include <string>
 #include <models/TbUser.h>
-#include <map>
+#include <unordered_map>
 
 using namespace drogon_model::hmdp;
 
@@ -22,12 +22,22 @@ class UserDTO
 {
 public:
     UserDTO(TbUser* tbUser);
-    std::map<std::string,std::string>& getMapObject();
+    UserDTO(std::unordered_map<std::string,std::string> userMap);
+    std::unordered_map<std::string,std::string>& getMapObject();
+
+    //set get
+    const long &getId();
+    const std::string &getNickName();
+    const std::string &getIcon();
+    void setId(long id);
+    void setNickName(const std::string &nickName);
+    void setIcon(const std::string &icon);
+
 private:
     long id;
     std::string nickName;
     std::string icon;
-    std::map<std::string,std::string> userDto;
+    std::unordered_map<std::string,std::string> userDto;
 };
 
 #endif //_USERDTO_H_

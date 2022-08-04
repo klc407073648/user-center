@@ -9,12 +9,12 @@ class RedisConstants
 public:
     //"const std::string" 类型的成员不能包含类内初始值设定项
     static const std::string LOGIN_CODE_KEY;
-    static const long LOGIN_CODE_TTL = 2;
+    static const long LOGIN_CODE_TTL = 2 * 60; // 120sec
 
     static const std::string LOGIN_USER_KEY;
-    static const long LOGIN_USER_TTL = 36000L;
+    static const long LOGIN_USER_TTL = 10 * 60 * 60;
 
-    static const long CACHE_NULL_TTL = 2;
+    static const long CACHE_NULL_TTL = 2 * 60;
 
     static const long CACHE_SHOP_TTL = 30;
     static const std::string CACHE_SHOP_KEY;

@@ -61,4 +61,25 @@ void UserController::userLogin(const HttpRequestPtr &request, std::function<void
     }
 }
 void UserController::userLogout(const HttpRequestPtr &request, std::function<void(const HttpResponsePtr &)> &&callback) {}
-void UserController::userCurrent(const HttpRequestPtr &request, std::function<void(const HttpResponsePtr &)> &&callback) {}
+void UserController::userCurrent(const HttpRequestPtr &request, std::function<void(const HttpResponsePtr &)> &&callback) 
+{
+    LOG_INFO << "UserController::userCurrent in";
+
+    try
+    {
+        TbUser tbUser= userSrvPtr_->getCurrent(request);
+
+        auto base = ResultUtils<TbUser>::susscess(tbUser);
+        auto json = Response2json<TbUser>::rep2json(base);
+        auto resp = HttpResponse::newHttpJsonResponse(json);
+        callback(resp);
+    }
+    catch (BusinessException &e)
+    {
+        LOG_INFO << "BusinessException error: message:" << e.what() << ",description" << e.getDescription();
+        auto base = ResultUtils<long>::error(e.getCode(), e.getMessage(), e.getDescription());
+        auto json = Response2json<long>::rep2json(base);
+        auto resp = HttpResponse::newHttpJsonResponse(json);
+        callback(resp);
+    }
+}

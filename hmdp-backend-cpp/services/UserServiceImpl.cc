@@ -4,8 +4,6 @@
 #include <drogon/nosql/RedisClient.h>
 #include <utils/RegexUtils.h>
 #include <utils/RandomUtils.h>
-#include <map>
-#include <dto/UserDTO.h>
 
 using namespace usercenter;
 using namespace drogon::internal;
@@ -13,6 +11,8 @@ using namespace drogon::nosql;
 
 std::string UserServiceImpl::sendCode(const std::string &phone)
 {
+    LOG_DEBUG << "发送短信验证码对应的手机号:" << phone;
+
     // 1.校验手机号
     if (!RegexUtils::isPhoneInvalid(phone))
     {
@@ -23,21 +23,15 @@ std::string UserServiceImpl::sendCode(const std::string &phone)
     // 3.符合，生成验证码
     std::string code = RandomUtils::getRandomNumberStr(6);
 
-    // 4.保存验证码到 session
+    // 4.保存验证码到session
     std::string key = RedisConstants::LOGIN_USER_KEY + phone;
 
-    redisClient->execCommandAsync(
-        [](const drogon::nosql::RedisResult &r) {},
-        [](const std::exception &err)
-        {
-            LOG_ERROR << "something failed!!! " << err.what();
-        },
-        "SETEX %s %d %s", key.c_str(), RedisConstants::LOGIN_CODE_TTL * 60, code.c_str());
+    redisClient.setex(key, RedisConstants::LOGIN_CODE_TTL, code);
 
-    // stringRedisTemplate.opsForValue().set(LOGIN_CODE_KEY + phone, code, LOGIN_CODE_TTL, TimeUnit.MINUTES);
+    LOG_DEBUG << "保存验证码到session: " << key << "=" << code;
 
     // 5.发送验证码
-    LOG_INFO << "发送短信验证码成功，验证码：" << code;
+    LOG_INFO << "发送短信验证码成功，验证码:" << code;
     // 返回ok
 
     return code;
@@ -45,6 +39,8 @@ std::string UserServiceImpl::sendCode(const std::string &phone)
 
 std::string UserServiceImpl::login(const std::string &phone, const std::string &code)
 {
+    LOG_DEBUG << "短信验证码登陆: 手机号:" << phone << ", 验证码:" << code;
+
     // 1.校验手机号
     if (!RegexUtils::isPhoneInvalid(phone))
     {
@@ -53,24 +49,17 @@ std::string UserServiceImpl::login(const std::string &phone, const std::string &
     }
 
     // 3.从redis获取验证码并校验
-    std::string cacheCode;
-	std::string key = RedisConstants::LOGIN_USER_KEY + phone;
-    
-    redisClient->execCommandAsync(
-    [](const drogon::nosql::RedisResult &r) {
-        if (r.isNil())
-            LOG_INFO << "Cannot find variable associated with the key 'name'";
-        else{
-            LOG_INFO << "Name is " << r.asString();
-			//cacheCode = r.asString();
-		}
-		 LOG_INFO << "Name is " << r.asString();
-    },
-    [](const std::exception &err) {
-        LOG_ERROR << "something failed!!! " << err.what();
-    },
-    "get " + key);
-     
+    std::string key = RedisConstants::LOGIN_USER_KEY + phone;
+
+    std::string cacheCode("");
+    auto val = redisClient.get(key);
+
+    if (val)
+    {
+        cacheCode = *val;
+    }
+
+    LOG_INFO << "Redis中存储的验证码: " << key << "=" << cacheCode;
 
     if (cacheCode == "" || cacheCode != code)
     {
@@ -78,55 +67,44 @@ std::string UserServiceImpl::login(const std::string &phone, const std::string &
     }
 
     // 4.一致，根据手机号查询用户 select * from tb_user where phone = ?
-    auto users = userMapper.findBy(Criteria(TbUser::Cols::_phone, CompareOperator::EQ, phone));
+    auto userList = userMapper.findBy(Criteria(TbUser::Cols::_phone, CompareOperator::EQ, phone));
     TbUser user;
+
+    LOG_DEBUG << "根据手机号查询的用户数量: " << userList.size();
+
     // 5.判断用户是否存在
-    if (users.size() == 0)
+    if (userList.size() == 0)
     {
         // 6.不存在，创建新用户并保存
         user = createUserWithPhone(phone);
     }
     else
     {
-        user = users[0];
+        user = getSafetyUser(userList[0]);
     }
 
     // 7.保存用户信息到 redis中
     // 7.1.随机生成token，作为登录令牌
     std::string token = utils::getUuid();
+
     // 7.2.将User对象转为HashMap存储
     UserDTO *userDTO = new UserDTO(&user);
-    std::map<std::string, std::string> userMap = userDTO->getMapObject();
-    // 7.3.存储
-    std::string tokenKey = RedisConstants::LOGIN_USER_KEY + token;
-    LOG_DEBUG << "tokenKey: " << tokenKey;
+    std::unordered_map<std::string, std::string> userMap = userDTO->getMapObject();
 
-    std::string execCmd = "hmset " + tokenKey;
-
+    // TODO 插入数据的id有问题
     for (auto iter = userMap.begin(); iter != userMap.end(); iter++)
     {
-        execCmd = execCmd + iter->first + " " + iter->second + " ";
+        LOG_DEBUG << iter->first << ":" << iter->second;
     }
 
-    redisClient->execCommandAsync(
-        [](const drogon::nosql::RedisResult &r) {},
-        [](const std::exception &err)
-        {
-            LOG_ERROR << "something failed!!! " << err.what();
-        },
-        execCmd);
-
-    LOG_DEBUG << "execCmd: " << execCmd;
+    // 7.3.存储
+    std::string tokenKey = RedisConstants::LOGIN_USER_KEY + token;
+    redisClient.hmset(tokenKey, userMap.begin(), userMap.end());
 
     // 7.4.设置token有效期
-    redisClient->execCommandAsync(
-        [](const drogon::nosql::RedisResult &r) {},
-        [](const std::exception &err)
-        {
-            LOG_ERROR << "something failed!!! " << err.what();
-        },
-        "expire %s %d",
-        tokenKey, RedisConstants::LOGIN_USER_TTL);
+    redisClient.expire(tokenKey, RedisConstants::LOGIN_USER_TTL);
+
+    LOG_INFO << "tokenKey:" << tokenKey;
 
     // 8.返回token
     return token;
@@ -138,12 +116,65 @@ long UserServiceImpl::logout(const HttpRequestPtr &request)
 
 TbUser UserServiceImpl::getCurrent(const HttpRequestPtr &request)
 {
+    // 1.获取请求头中的token
+    std::string token = request->getHeader("JSESSIONID");
+
+    LOG_DEBUG << "获取请求头中的token:" << token;
+
+    if (token == "")
+    {
+        throw BusinessException(ErrorCode::NO_LOGIN(), "用户未登陆");
+    }
+    // 2.基于TOKEN获取redis中的用户
+    std::string key = RedisConstants::LOGIN_USER_KEY + token;
+    std::unordered_map<std::string, std::string> userMap;
+    redisClient.hgetall(key, std::inserter(userMap, userMap.begin()));
+
+    for (auto iter = userMap.begin(); iter != userMap.end(); iter++)
+    {
+        LOG_DEBUG << iter->first << ":" << iter->second;
+    }
+
+    // 3.判断用户是否存在
+    if (userMap.size() == 0)
+    {
+        throw BusinessException(ErrorCode::PARAMS_ERROR(), "用户不存在");
+    }
+    // 5.将查询到的hash数据转为UserDTO
+    UserDTO *userDTO = new UserDTO(userMap);
+    // 6.存在，保存用户信息到 ThreadLocal
+    TbUser user;
+    user.setId(userDTO->getId());
+    user.setNickName(userDTO->getNickName());
+    user.setIcon(userDTO->getIcon());
+    // 7.刷新token有效期
+    redisClient.expire(key, RedisConstants::LOGIN_USER_TTL);
+
+    return user;
 }
 
 TbUser UserServiceImpl::createUserWithPhone(const std::string &phone)
 {
     TbUser user;
     user.setPhone(phone);
+    user.setNickName("user_" + RandomUtils::getRandomNumberStr(10));
+    userMapper.insert(user);
 
+    auto ret = userMapper.findBy(Criteria(TbUser::Cols::_phone, CompareOperator::EQ, phone));
+    if (ret.size() != 1)
+    {
+        throw BusinessException(ErrorCode::PARAMS_ERROR(), "插入数据失败");
+    }
     return user;
+}
+
+TbUser UserServiceImpl::getSafetyUser(TbUser originUser)
+{
+    TbUser safetyUser;
+    safetyUser.setId(originUser.getValueOfId());
+    safetyUser.setPhone(originUser.getValueOfPhone());
+    safetyUser.setNickName(originUser.getValueOfNickName());
+    safetyUser.setIcon(originUser.getValueOfIcon());
+
+    return safetyUser;
 }

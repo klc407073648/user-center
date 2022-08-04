@@ -8,6 +8,7 @@
 #include <common/Response2json.h>
 #include <string>
 #include <json/json.h>
+#include <dto/UserDTO.h>
 
 using namespace drogon;
 using namespace drogon_model::hmdp;

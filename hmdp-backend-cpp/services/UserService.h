@@ -5,6 +5,7 @@
 #include <vector>
 #include <models/TbUser.h>
 #include <drogon/HttpController.h>
+#include <dto/UserDTO.h>
 
 using namespace drogon;
 using namespace drogon_model::hmdp;
