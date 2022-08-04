@@ -42,6 +42,6 @@ namespace usercenter
 
   private:
     Mapper<TbUser> userMapper = Mapper<TbUser>(app().getDbClient()); //对象持久化映射层,连接User对象和数据库
-    Redis redisClient = Redis("tcp://456789@81.68.132.31:6380");      // Redis连接对象
+    Redis redisClient = Redis("tcp://456789@127.0.0.1:6380");      // Redis连接对象
   };
 }

@@ -14,12 +14,12 @@
 	"db_clients": [
 		{
 			"rdbms": "mysql",
-			"host": "1.1.1.1",
+			"host": "127.0.0.1",
 			"port": 3308,
 			"dbname": "hmdp",
 			"schema": "public",
 			"user": "root",
-			"password": "123456",
+			"password": "456789",
 			"is_fast": false,
 			"number_of_connections": 1,
 			"timeout": -1.0
@@ -28,10 +28,10 @@
 	/*
 	"redis_clients": [
 		{
-			"host": "1.1.1.1",
+			"host": "127.0.0.1",
 			"port": 6380,
 			"username": "",
-			"passwd": "123456",
+			"passwd": "456789",
 			"db": 0,
 			"is_fast": false,
 			"number_of_connections": 1,

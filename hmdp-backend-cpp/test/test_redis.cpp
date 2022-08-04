@@ -56,7 +56,7 @@ int main()
 		cout << "test1222" << endl;
 		
         // Create an Redis object, which is movable but NOT copyable.
-        auto redis = Redis("tcp://456789@81.68.132.31:6380");
+        auto redis = Redis("tcp://456789@127.0.0.1:6380");
 		//tcp://[[username:]password@]host[:port][/db]
 		//redis.auth("456789");
 		cout << "test333" << endl;
