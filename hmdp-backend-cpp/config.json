@@ -28,10 +28,10 @@
 	/*
 	"redis_clients": [
 		{
-			"host": "81.68.132.31",
+			"host": "1.1.1.1",
 			"port": 6380,
 			"username": "",
-			"passwd": "456789",
+			"passwd": "123456",
 			"db": 0,
 			"is_fast": false,
 			"number_of_connections": 1,
