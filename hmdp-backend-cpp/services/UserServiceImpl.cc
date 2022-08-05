@@ -39,7 +39,7 @@ std::string UserServiceImpl::sendCode(const std::string &phone)
 
 std::string UserServiceImpl::login(const std::string &phone, const std::string &code)
 {
-    LOG_DEBUG << "短信验证码登陆: 手机号:" << phone << ", 验证码:" << code;
+    LOG_DEBUG << "短信验证码登陆, 手机号: " << phone << ", 验证码: " << code;
 
     // 1.校验手机号
     if (!RegexUtils::isPhoneInvalid(phone))
@@ -91,12 +91,6 @@ std::string UserServiceImpl::login(const std::string &phone, const std::string &
     UserDTO *userDTO = new UserDTO(&user);
     std::unordered_map<std::string, std::string> userMap = userDTO->getMapObject();
 
-    // TODO 插入数据的id有问题
-    for (auto iter = userMap.begin(); iter != userMap.end(); iter++)
-    {
-        LOG_DEBUG << iter->first << ":" << iter->second;
-    }
-
     // 7.3.存储
     std::string tokenKey = RedisConstants::LOGIN_USER_KEY + token;
     redisClient.hmset(tokenKey, userMap.begin(), userMap.end());
@@ -104,7 +98,7 @@ std::string UserServiceImpl::login(const std::string &phone, const std::string &
     // 7.4.设置token有效期
     redisClient.expire(tokenKey, RedisConstants::LOGIN_USER_TTL);
 
-    LOG_INFO << "tokenKey:" << tokenKey;
+    LOG_INFO << "tokenKey=" << tokenKey;
 
     // 8.返回token
     return token;
@@ -125,29 +119,26 @@ TbUser UserServiceImpl::getCurrent(const HttpRequestPtr &request)
     {
         throw BusinessException(ErrorCode::NO_LOGIN(), "用户未登陆");
     }
+
     // 2.基于TOKEN获取redis中的用户
     std::string key = RedisConstants::LOGIN_USER_KEY + token;
     std::unordered_map<std::string, std::string> userMap;
     redisClient.hgetall(key, std::inserter(userMap, userMap.begin()));
-
-    for (auto iter = userMap.begin(); iter != userMap.end(); iter++)
-    {
-        LOG_DEBUG << iter->first << ":" << iter->second;
-    }
 
     // 3.判断用户是否存在
     if (userMap.size() == 0)
     {
         throw BusinessException(ErrorCode::PARAMS_ERROR(), "用户不存在");
     }
-    // 5.将查询到的hash数据转为UserDTO
+
+    // 4.将查询到的hash数据转为UserDTO
     UserDTO *userDTO = new UserDTO(userMap);
-    // 6.存在，保存用户信息到 ThreadLocal
+    // 5.存在，保存用户信息到 ThreadLocal
     TbUser user;
     user.setId(userDTO->getId());
     user.setNickName(userDTO->getNickName());
     user.setIcon(userDTO->getIcon());
-    // 7.刷新token有效期
+    // 6.刷新token有效期
     redisClient.expire(key, RedisConstants::LOGIN_USER_TTL);
 
     return user;
@@ -161,14 +152,16 @@ TbUser UserServiceImpl::createUserWithPhone(const std::string &phone)
     userMapper.insert(user);
 
     auto ret = userMapper.findBy(Criteria(TbUser::Cols::_phone, CompareOperator::EQ, phone));
+
     if (ret.size() != 1)
     {
         throw BusinessException(ErrorCode::PARAMS_ERROR(), "插入数据失败");
     }
+
     return user;
 }
 
-TbUser UserServiceImpl::getSafetyUser(TbUser originUser)
+TbUser UserServiceImpl::getSafetyUser(const TbUser& originUser)
 {
     TbUser safetyUser;
     safetyUser.setId(originUser.getValueOfId());

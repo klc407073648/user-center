@@ -1,6 +1,7 @@
 #pragma once
 
 #include <common/BaseResponse.h>
+#include <exception/BusinessException.h>
 #include <string>
 #include <vector>
 
@@ -60,5 +61,15 @@ public:
     static BaseResponse<T> error(ErrorCode errorCode, const std::string &description)
     {
         return BaseResponse<T>(errorCode.getCode(), NULL, errorCode.getMessage(), description);
+    }
+
+    /**
+     * 失败
+     * @param errorCode
+     * @return
+     */
+    static BaseResponse<T> error(BusinessException e)
+    {
+        return BaseResponse<T>(e.getCode(),NULL, e.getMessage(), e.getDescription());
     }
 };

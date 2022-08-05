@@ -38,7 +38,7 @@ namespace usercenter
 
   private:
     TbUser createUserWithPhone(const std::string &phone);
-    TbUser getSafetyUser(TbUser originUser);
+    TbUser getSafetyUser(const TbUser& originUser);
 
   private:
     Mapper<TbUser> userMapper = Mapper<TbUser>(app().getDbClient()); //对象持久化映射层,连接User对象和数据库
