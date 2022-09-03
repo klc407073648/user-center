@@ -21,7 +21,7 @@ public class InsertUsers {
     public void doInsertUsers(){
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        final int INSERT_NUM = 10000000;
+        final int INSERT_NUM = 10000;
         for(int i=0;i<INSERT_NUM;i++){
             User user = new User();
             user.setUsername("假用户");

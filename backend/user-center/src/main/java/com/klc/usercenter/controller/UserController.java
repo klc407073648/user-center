@@ -11,7 +11,10 @@ import com.klc.usercenter.model.domain.User;
 import com.klc.usercenter.model.domain.request.UserLoginRequest;
 import com.klc.usercenter.model.domain.request.UserRegisterRequest;
 import com.klc.usercenter.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +22,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.klc.usercenter.constant.UserConstant.ADMIN_ROLE;
@@ -30,9 +34,13 @@ import static com.klc.usercenter.constant.UserConstant.USER_LOGIN_STATE;
 @RestController
 @RequestMapping("/user")
 @CrossOrigin(origins = {"http://localhost:3000","http://localhost:8000"},allowedHeaders = "*",methods = {},allowCredentials = "true")
+@Slf4j
 public class UserController {
     @Resource
     private UserService userService;
+
+    @Resource
+    private RedisTemplate<String,Object> redisTemplate;
     
     @PostMapping("register")
     public BaseResponse<Long> userRegister(@RequestBody UserRegisterRequest userRegisterRequest){
@@ -126,11 +134,28 @@ public class UserController {
     //支持分页
     @GetMapping("/recommend")
     public BaseResponse<Page<User>> recommendUsers(long pageSize,long pageNum,HttpServletRequest request){
+        User loginUser = userService.getLoginUser(request);
+        //如果存在缓存数据，直接返回
+        String redisKey = String.format("yupao:user:recommand:%s",loginUser.getId());
+        ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
+        Page<User> userPage = (Page<User>) valueOperations.get(redisKey);
+
+        if(userPage!=null){
+            return ResultUtils.susscess(userPage);
+        }
+
+        //无缓存从数据库查询
         QueryWrapper<User> queryWrapper =new QueryWrapper<>();
+        userPage = userService.page(new Page<>(pageNum,pageSize),queryWrapper);
 
-        Page<User> userList = userService.page(new Page<>(pageNum,pageSize),queryWrapper);
+        //同时写入缓存
+        try {
+            valueOperations.set(redisKey, userPage, 30000, TimeUnit.MILLISECONDS);
+        } catch(Exception e){
+            log.error("redis error:",e);
+        }
 
-        return ResultUtils.susscess(userList);
+        return ResultUtils.susscess(userPage);
     }
 
     //原始推荐方法
