@@ -6,6 +6,8 @@ import com.klc.usercenter.mapper.UserMapper;
 import com.klc.usercenter.model.domain.User;
 import com.klc.usercenter.service.UserService;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -32,26 +34,47 @@ public class PreCacheJob {
     @Resource
     private RedisTemplate redisTemplate;
 
+    @Resource
+    private RedissonClient redissonClient;
+
     //重点用户缓存
     List<Long> mainUserList = Arrays.asList(1L);
 
-    @Scheduled(cron = "0 56 23 * * *")
-    public void doCacheRecommendUser(){
-        //重点用户缓存
-        for(Long userId:mainUserList) {
-            //从数据库查询记录
-            QueryWrapper<User> queryWrapper =new QueryWrapper<>();
-            Page<User>  userPage = userService.page(new Page<>(1,20),queryWrapper);
+    @Scheduled(cron = "0 58 16 * * *")
+    public void doCacheRecommendUser()  {
+        RLock lock = redissonClient.getLock("yupao:precachejob:docache:lock");
 
-            //拼接key
-            String redisKey = String.format("yupao:user:recommand:%s", userId);
-            ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
+        try
+        {
+            if(lock.tryLock(0,30000,TimeUnit.MILLISECONDS)) {
+                System.out.println("getLock:"+Thread.currentThread().getId());
+                //重点用户缓存
+                for (Long userId : mainUserList) {
+                    //从数据库查询记录
+                    QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+                    Page<User> userPage = userService.page(new Page<>(1, 20), queryWrapper);
 
-            try {
-                //写入缓存
-                valueOperations.set(redisKey, userPage, 30000, TimeUnit.MILLISECONDS);
-            } catch(Exception e){
-                log.error("redis error:",e);
+                    //拼接key
+                    String redisKey = String.format("yupao:user:recommand:%s", userId);
+                    ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
+
+                    try {
+                        //写入缓存
+                        valueOperations.set(redisKey, userPage, 30000, TimeUnit.MILLISECONDS);
+                    } catch (Exception e) {
+                        log.error("redis error:", e);
+                    }
+                }
+            }
+        }
+        catch (InterruptedException e){
+            e.printStackTrace();
+            log.error("yupao:precachejob:docache:lock error",e);
+        }finally {
+            //只能释放自己的锁
+            if(lock.isHeldByCurrentThread()){
+                System.out.println("unlock"+Thread.currentThread().getId());
+                lock.unlock();
             }
         }
 
