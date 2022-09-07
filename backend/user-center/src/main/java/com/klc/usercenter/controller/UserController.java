@@ -1,15 +1,14 @@
 package com.klc.usercenter.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.klc.usercenter.common.BaseResponse;
 import com.klc.usercenter.common.ErrorCode;
 import com.klc.usercenter.common.ResultUtils;
 import com.klc.usercenter.exception.BusinessException;
 import com.klc.usercenter.model.domain.User;
-import com.klc.usercenter.model.domain.request.UserLoginRequest;
-import com.klc.usercenter.model.domain.request.UserRegisterRequest;
+import com.klc.usercenter.model.request.UserLoginRequest;
+import com.klc.usercenter.model.request.UserRegisterRequest;
 import com.klc.usercenter.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -20,12 +19,10 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static com.klc.usercenter.constant.UserConstant.ADMIN_ROLE;
 import static com.klc.usercenter.constant.UserConstant.USER_LOGIN_STATE;
 
 /**
@@ -59,7 +56,7 @@ public class UserController {
 
         long id = userService.userRegister(userAccount, userPassword, checkPassword,planetCode);
 
-        return ResultUtils.susscess(id);
+        return ResultUtils.success(id);
     }
 
     @PostMapping("login")
@@ -76,7 +73,7 @@ public class UserController {
         }
 
         User user= userService.userLogin(userAccount, userPassword,request);
-        return ResultUtils.susscess(user);
+        return ResultUtils.success(user);
 
     }
     @PostMapping("logout")
@@ -86,7 +83,7 @@ public class UserController {
         }
 
         Integer result =  userService.userLogout(request);
-        return ResultUtils.susscess(result);
+        return ResultUtils.success(result);
 
     }
     @GetMapping("/search")
@@ -104,7 +101,7 @@ public class UserController {
         List<User> userList = userService.list();
         List<User> retUserList =userList.stream().map(user -> userService.getSafetyUser(user)).collect(Collectors.toList());
 
-        return ResultUtils.susscess(retUserList);
+        return ResultUtils.success(retUserList);
     }
 
     @GetMapping("/search/tags")
@@ -114,7 +111,7 @@ public class UserController {
         }
 
         List<User> userList =userService.searchUsersByTags(tagNameList);
-        return ResultUtils.susscess(userList);
+        return ResultUtils.success(userList);
     }
 
     @PostMapping("update")
@@ -128,7 +125,7 @@ public class UserController {
         //2.用户是否有权限
         //3.更新用户
         int  result= userService.updateUser(user,loginUser);
-        return ResultUtils.susscess(result);
+        return ResultUtils.success(result);
     }
 
     //支持分页
@@ -141,7 +138,7 @@ public class UserController {
         Page<User> userPage = (Page<User>) valueOperations.get(redisKey);
 
         if(userPage!=null){
-            return ResultUtils.susscess(userPage);
+            return ResultUtils.success(userPage);
         }
 
         //无缓存从数据库查询
@@ -155,7 +152,7 @@ public class UserController {
             log.error("redis error:",e);
         }
 
-        return ResultUtils.susscess(userPage);
+        return ResultUtils.success(userPage);
     }
 
     //原始推荐方法
@@ -180,7 +177,7 @@ public class UserController {
         long userId =curentUser.getId();
         User user = userService.getById(userId);
         User safeUser =userService.getSafetyUser(user);
-        return ResultUtils.susscess(safeUser);
+        return ResultUtils.success(safeUser);
     }
 
     @PostMapping ("/delete")
@@ -195,7 +192,7 @@ public class UserController {
 
         Boolean ret = userService.removeById(id);
 
-        return ResultUtils.susscess(ret);
+        return ResultUtils.success(ret);
     }
 
 }
