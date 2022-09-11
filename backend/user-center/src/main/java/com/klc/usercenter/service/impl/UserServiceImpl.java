@@ -277,7 +277,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      */
     @Override
     public boolean isAdmin(User loginUser){
-        return (loginUser == null || loginUser.getUserRole()!= ADMIN_ROLE);
+        if(loginUser == null || loginUser.getUserRole()!= ADMIN_ROLE){
+            return false;
+        }
+        return true;
     }
 
     /**

@@ -3,6 +3,12 @@ package com.klc.usercenter.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.klc.usercenter.model.domain.Team;
 import com.klc.usercenter.model.domain.User;
+import com.klc.usercenter.model.dto.TeamQuery;
+import com.klc.usercenter.model.request.TeamJoinRequest;
+import com.klc.usercenter.model.request.TeamUpdateRequest;
+import com.klc.usercenter.model.vo.TeamUserVO;
+
+import java.util.List;
 
 /**
 * @author Jason
@@ -19,4 +25,22 @@ public interface TeamService extends IService<Team> {
      * @return
      */
     long addTeam(Team team, User loginUser);
+
+
+    /**
+     * 搜索队伍
+     * @param teamQuery
+     * @return
+     */
+    List<TeamUserVO> listTeams(TeamQuery teamQuery,boolean isAdmin);
+
+    /**
+     * 更新队伍
+     * @param teamUpdateRequest
+     * @return
+     */
+    boolean updateTeam(TeamUpdateRequest teamUpdateRequest,User loginUser);
+
+
+    boolean joinTeam(TeamJoinRequest teamJoinRequest,User loginUser);
 }

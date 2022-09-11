@@ -1,14 +1,23 @@
-package com.klc.usercenter.model.request;
+package com.klc.usercenter.model.vo;
 
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
+/**
+ *  队伍和用户信息封装类
+ */
 @Data
-public class TeamAddRequest implements Serializable {
+public class TeamUserVO implements Serializable {
 
-    private static final long serialVersionUID = -2898578180195614188L;
+    private static final long serialVersionUID = 2394125302533616161L;
+    /**
+     * id
+     */
+    private Long id;
+
     /**
      * 队伍名称
      */
@@ -40,7 +49,17 @@ public class TeamAddRequest implements Serializable {
     private Integer status;
 
     /**
-     * 密码
+     * 创建时间
      */
-    private String password;
+    private Date createTime;
+
+    /**
+     * 更新时间
+     */
+    private Date updateTime;
+
+    /**
+     * 创建人用户信息
+     */
+    UserVO createUser;
 }
