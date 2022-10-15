@@ -6,14 +6,17 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * 用户加入队伍请求体
+ * 用户退出队伍请求体
  */
 @Data
-public class TeamJoinRequest implements Serializable {
+public class TeamQuitRequest implements Serializable {
 
     private static final long serialVersionUID = -2898578180195614188L;
 
+    /**
+     * 用户id
+     */
     private Long teamId;
 
-    private String password;
+
 }

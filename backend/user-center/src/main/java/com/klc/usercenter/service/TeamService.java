@@ -5,6 +5,7 @@ import com.klc.usercenter.model.domain.Team;
 import com.klc.usercenter.model.domain.User;
 import com.klc.usercenter.model.dto.TeamQuery;
 import com.klc.usercenter.model.request.TeamJoinRequest;
+import com.klc.usercenter.model.request.TeamQuitRequest;
 import com.klc.usercenter.model.request.TeamUpdateRequest;
 import com.klc.usercenter.model.vo.TeamUserVO;
 
@@ -41,6 +42,24 @@ public interface TeamService extends IService<Team> {
      */
     boolean updateTeam(TeamUpdateRequest teamUpdateRequest,User loginUser);
 
-
+    /**
+     * 加入队伍
+     * @param TeamJoinRequest
+     * @return
+     */
     boolean joinTeam(TeamJoinRequest teamJoinRequest,User loginUser);
+
+    /**
+     * 退出队伍
+     * @param teamQuitRequest
+     * @return
+     */
+    boolean quitTeam(TeamQuitRequest teamQuitRequest, User loginUser);
+
+    /**
+     * 解散队伍
+     * @param teamId
+     * @return
+     */
+    boolean deleteTeam(long teamId, User loginUser) ;
 }

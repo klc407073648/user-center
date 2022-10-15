@@ -1,7 +1,9 @@
 package com.klc.usercenter.service;
 
+import com.klc.usercenter.common.BaseResponse;
 import com.klc.usercenter.model.domain.User;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.klc.usercenter.model.vo.UserVO;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -78,4 +80,12 @@ public interface UserService extends IService<User> {
      * @return
      */
     boolean isAdmin(User loginUser);
+
+    /**
+     * 匹配用户
+     * @param num
+     * @param loginUser
+     * @return
+     */
+    List<User> matchUsers(long num, User loginUser);
 }
