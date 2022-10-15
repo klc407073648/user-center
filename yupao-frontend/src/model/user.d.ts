@@ -17,5 +17,5 @@ export type UserType = {
     isDelete?: number;
     userRole?: number;
     planetCode?: number;
-    tags: string[];
+    tags: string;
 };

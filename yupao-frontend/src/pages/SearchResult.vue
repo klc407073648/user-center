@@ -45,8 +45,6 @@
         })
         .then(function (response) {
             console.log('/user/search/tags succeed',response);
-            Toast.success('请求成功')
-
             console.log('response:'+response)
             return response?.data;
         })
