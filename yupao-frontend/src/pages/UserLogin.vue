@@ -29,8 +29,9 @@
     import {onMounted,ref} from 'vue';
     import myAxios from "../plugins/myAxios";
     import {Toast} from "vant";
-    import {useRouter} from "vue-router";
+    import {useRouter,useRoute} from "vue-router";
     const router= useRouter()
+    const route= useRoute()
 
     const userAccount = ref('');
     const userPassword = ref('');
@@ -45,7 +46,9 @@
 
         if(res.code === 0 && res.data){
             Toast.success('登陆成功')
-            router.replace('/')
+
+            const redirectUrl = route.query?.redirect??'/';
+            window.location.href = redirectUrl;
         }
         else{
             Toast.fail('登陆失败')

@@ -3,7 +3,7 @@
     <van-empty v-if ="!userList || userList.length < 1" description="搜索结果为空" />
 </template>
 
-<script setup >
+<script setup lang="ts">
     import {useRoute} from "vue-router";
     import {onMounted,ref} from 'vue';
     import myAxios from "../plugins/myAxios";

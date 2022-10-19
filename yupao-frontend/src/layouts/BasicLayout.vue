@@ -56,8 +56,10 @@
 
 </script>
 
+<!-- TODO 底部边框显示按钮有问题 -->
 <style scoped>
-#content {
-   padding-bottom: 50px;
-}
+    #content {
+        padding-bottom: 50px;
+    }
 </style>
+

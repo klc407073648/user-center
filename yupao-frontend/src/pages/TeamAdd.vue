@@ -65,11 +65,12 @@
     </van-form>
 </template>
 
-<script setup>
+<script setup lang="ts">
 
     import {ref} from "vue";
     import myAxios from "../plugins/myAxios";
     import {useRouter} from "vue-router";
+    import {Toast} from "vant";
 
     const router =useRouter();
 
@@ -97,7 +98,6 @@
         const res = await myAxios.post("/team/add",postData);
 
         if(res?.code === 0 && res.data){
-            Toast.success('添加成功');
             router.push({
                 path: '/team',
                 replace:true,

@@ -12,7 +12,7 @@
         </template>
         <template #bottom>
             <div>
-                {{'最大人数：' + team.maxNum}}
+                {{`最大人数：${team.hasJoinNum}/${team.maxNum}`}}
             </div>
             <div v-if="team.expireTime">
                 {{'过期时间：' + team.expireTime}}
@@ -22,14 +22,16 @@
             </div>
         </template>
         <template #footer>
-            <van-button v-if="team.userId !== currentUser?.id && !team.hasJoin" size="small" plain  type="primary"  @click="doJoinTeam(team.id)">加入队伍</van-button>
+            <van-button v-if="team.userId !== currentUser?.id && !team.hasJoin" size="small" plain  type="primary"  @click="preJoinTeam(team)">加入队伍</van-button>
             <van-button v-if="team.userId === currentUser?.id" size="small" plain  @click="doUpdateTeam(team.id)">更新队伍</van-button>
             <!-- TODO 仅加入队伍可见 -->
             <van-button v-if="team.userId !== currentUser?.id && team.hasJoin" size="small" plain  @click="doQuitTeam(team.id)">退出队伍</van-button>
             <van-button v-if="team.userId === currentUser?.id" size="small" plain  type="danger" @click="doDeleteTeam(team.id)">解散队伍</van-button>
         </template>
     </van-card>
-    {{'currentUser' + currentUser}}
+    <van-dialog v-model:show="showPasswordDialog" title="请输入密码" show-cancel-button @confirm="doJoinTeam" @cancel="doJoinCancel">
+        <van-field v-model="password" placeholder="请输入密码" />
+    </van-dialog>
 </template>
 
 <script setup lang="ts">
@@ -47,6 +49,9 @@
     const router =useRouter();
 
     const currentUser:UserType = ref();
+    const showPasswordDialog = ref(false);
+    const password = '';
+    const joinTeamId = ref();
 
 
     //显示currentUser：[object Object]，没有具体的内容
@@ -62,17 +67,35 @@
         teamList: [] as TeamType[],
     });
 
+    const preJoinTeam = (team: TeamType) =>{
+        joinTeamId.value = team.id;
+        if(team.status ===0){
+            doJoinTeam()
+        }else{
+            showPasswordDialog.value =true;
+        }
+    }
+
+    const doJoinCancel = () =>{
+        joinTeamId.value =0;
+        password.value = '';
+    }
     /**
      * 加入队伍
      * @param id
      */
-    const doJoinTeam = async (id:number) =>{
+    const doJoinTeam = async () =>{
+        if(!joinTeamId.value){
+            return;
+        }
         const res = await myAxios.post('/team/join',{
-            teamId:id
+            teamId:joinTeamId.value,
+            password:password.value,
         });
 
         if(res?.code === 0){
             Toast.success('加入成功')
+            doJoinCancel();
         }
         else{
             Toast.fail('加入失败' + (res.description?`, ${res.description}`:''))
